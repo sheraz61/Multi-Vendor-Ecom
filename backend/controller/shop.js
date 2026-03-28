@@ -176,4 +176,20 @@ router.get('/get-seller', isSeller, catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler(error.message, 500));
     }
 }))
+
+//logout from shop
+router.get('/shop-logout',isSeller,catchAsyncErrors(async(req,res,next)=>{
+    try {
+        res.cookie('seller_token',null,{
+            expires:new Date(Date.now()),
+            httpOnly:true
+        })
+        res.status(201).json({
+            success:true,
+            message:'logout successfully'
+        })
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+}))
 export default router

@@ -24,8 +24,10 @@ if (process.env.NODE_ENV !== "PRODUCTION") {
 // import routes
 import userRouter from './controller/user.js'
 import shopRouter from './controller/shop.js'
+import productRouter from './controller/product.js'
 app.use('/api/v2/user', userRouter)
 app.use('/api/v2/shop', shopRouter)
+app.use('/api/v2/product', productRouter)
 // it's for ErrorHandling...
 app.use(errorMiddleware)
 export default app
