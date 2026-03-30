@@ -4,23 +4,23 @@ import React, { useEffect } from "react";
 import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { getAllProductsShop } from "../../redux/actions/product";
-import { deleteProduct } from "../../redux/actions/product";
+import { getAllEventsShop } from "../../redux/actions/event";
+import { deleteEvent } from "../../redux/actions/event";
 import Loader from "../Layout/Loader";
 
-const AllProducts = () => {
-  const { products, isLoading } = useSelector((state) => state.products);
+const AllEvents = () => {
+  const { events, isLoading } = useSelector((state) => state.events);
   const { seller } = useSelector((state) => state.shop);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getAllProductsShop(seller._id));
+    dispatch(getAllEventsShop(seller._id));
   }, [dispatch]);
 
   const handleDelete = (id) => {
-    dispatch(deleteProduct(id));
-    // window.location.reload();
+    dispatch(deleteEvent(id));
+    window.location.reload();
   };
 
   const columns = [
@@ -94,8 +94,8 @@ const AllProducts = () => {
 
   const row = [];
 
-  products &&
-    products.forEach((item) => {
+  events &&
+    events.forEach((item) => {
       row.push({
         id: item._id,
         name: item.name,
@@ -124,4 +124,4 @@ const AllProducts = () => {
   );
 };
 
-export default AllProducts;
+export default AllEvents;
