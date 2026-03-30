@@ -1,22 +1,26 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { LoginPage, SignupPage, ActivationPage, HomePage, EventsPage, ProductPage, BestSellingPage, FAQPage, ProductDetailsPage, ProfilePage, CheckoutPage, PaymentPage, OrderSuccessPage, ShopCreatePage, SellerActivationPage, ShopLoginPage } from './routes/Routes.js'
-import { ShopHomePage,ShopDashboardPage ,ShopCreateProduct , ShopAllProduct,ShopCreateEvents,ShopAllEvent,ShopAllCoupons} from './routes/ShopRoutes.js'
+import { ShopHomePage, ShopDashboardPage, ShopCreateProduct, ShopAllProduct, ShopCreateEvents, ShopAllEvent, ShopAllCoupons, ShopPreviewPage} from './routes/ShopRoutes.js'
 import { ToastContainer, toast } from 'react-toastify';
 import { useEffect } from 'react';
 import Store from './redux/store';
+import { useDispatch } from "react-redux";
 import { loadUser } from './redux/actions/user';
 import { loadSeller } from './redux/actions/shop';
+import { getAllProducts } from "./redux/actions/product";
+import { getAllEvents } from "./redux/actions/event";
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
 import SellerProtectedRoute from './routes/SellerProtectedRoute.jsx';
 const App = () => {
-  
+ const dispatch = useDispatch();
 
   useEffect(() => {
-    Store.dispatch(loadUser())
-    Store.dispatch(loadSeller())
-
-  }, [])
+    dispatch(loadUser());
+    dispatch(loadSeller());
+    dispatch(getAllProducts());
+    dispatch(getAllEvents());
+  }, [dispatch])
   return (
     <>
       <BrowserRouter>
@@ -27,7 +31,7 @@ const App = () => {
           <Route path='/activation/:activation_token' element={<ActivationPage />} />
           <Route path='/shop/activation/:activation_token' element={<SellerActivationPage />} />
           <Route path='/products' element={<ProductPage />} />
-          <Route path='/product/:name' element={<ProductDetailsPage />} />
+          <Route path='/product/:id' element={<ProductDetailsPage />} />
           <Route path='/best-selling' element={<BestSellingPage />} />
           <Route path='/events' element={<EventsPage />} />
           <Route path='/faq' element={<FAQPage />} />
@@ -43,7 +47,7 @@ const App = () => {
               <ProfilePage />
             </ProtectedRoute>
           } />
-
+<Route path="/shop/preview/:id" element={<ShopPreviewPage />} />
           <Route path='/shop-create' element={<ShopCreatePage />} />
           <Route path='/shop-login' element={<ShopLoginPage />} />
           <Route path='/shop/:id' element={

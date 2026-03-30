@@ -6,30 +6,36 @@ import Header from "../components/Layout/Header";
 import Loader from "../components/Layout/Loader.jsx";
 import ProductCard from "../components/Route/ProductCard/ProductCard";
 import styles from "../styles/style";
-import { productData } from "../static/data.jsx";
+
 
 function ProductPage() {
+  const {allProducts,isLoading} = useSelector((state) => state.products);
       const [searchParams] = useSearchParams();
   const categoryData = searchParams.get("category");
   const [data, setData] = useState([]);
 
     useEffect(() => {
     if (categoryData === null) {
-      const d = productData && productData.sort((a,b)=> a.total_sell - b.total_sell)
+      const d = allProducts;
       setData(d);
     } else {
       const d =
-      productData && productData.filter((i) => i.category === categoryData);
+      allProducts && allProducts.filter((i) => i.category === categoryData);
       setData(d);
     }
     //    window.scrollTo(0,0);
-  }, []);
+  }, [allProducts]);
   return (
-    <div>
-         <Header activeHeading={3} />
-         <br />
-         <br />
-         <div className={`${styles.section}`}>
+     <>
+  {
+    isLoading ? (
+      <Loader />
+    ) : (
+      <div>
+      <Header activeHeading={3} />
+      <br />
+      <br />
+      <div className={`${styles.section}`}>
         <div className="grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-4 lg:gap-[25px] xl:grid-cols-5 xl:gap-[30px] mb-12">
           {data && data.map((i, index) => <ProductCard data={i} key={index} />)}
         </div>
@@ -41,6 +47,9 @@ function ProductPage() {
       </div>
       <Footer />
     </div>
+    )
+  }
+  </>
   )
 }
 

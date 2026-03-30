@@ -2,23 +2,23 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
-// import { getAllProductsShop } from "../../redux/actions/product";
+import { getAllProductsShop } from "../../redux/actions/product";
 import styles from "../../styles/style";
 import ProductCard from "../Route/ProductCard/ProductCard";
-// import Ratings from "../Products/Ratings";
-// import { getAllEventsShop } from "../../redux/actions/event";
+import Ratings from "../Products/Ratings";
+import { getAllEventsShop } from "../../redux/actions/event";
 import { productData } from "../../static/data";
 
 const ShopProfileData = ({ isOwner }) => {
-//   const { products } = useSelector((state) => state.products);
-//   const { events } = useSelector((state) => state.events);
-//   const { id } = useParams();
-//   const dispatch = useDispatch();
+  const { products } = useSelector((state) => state.products);
+  const { events } = useSelector((state) => state.events);
+  const { id } = useParams();
+  const dispatch = useDispatch();
 
-//   useEffect(() => {
-//     dispatch(getAllProductsShop(id));
-//     dispatch(getAllEventsShop(id));
-//   }, [dispatch]);
+  useEffect(() => {
+    dispatch(getAllProductsShop(id));
+    dispatch(getAllEventsShop(id));
+  }, [dispatch]);
 
   const [active, setActive] = useState(1);
 
@@ -74,14 +74,14 @@ const ShopProfileData = ({ isOwner }) => {
       <br />
       {active === 1 && (
         <div className="grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3 lg:gap-[25px] xl:grid-cols-4 xl:gap-[20px] mb-12 border-0">
-          {productData &&
-            productData.map((i, index) => (
+          {products &&
+            products.map((i, index) => (
               <ProductCard data={i} key={index} isShop={true} />
             ))}
         </div>
       )}
 
-      {/* {active === 2 && (
+      {active === 2 && (
         <div className="w-full">
           <div className="grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3 lg:gap-[25px] xl:grid-cols-4 xl:gap-[20px] mb-12 border-0">
             {events &&
@@ -102,7 +102,7 @@ const ShopProfileData = ({ isOwner }) => {
         </div>
       )}
 
-      {active === 3 && (
+      {/* {active === 3 && (
         <div className="w-full">
           {allReviews &&
             allReviews.map((item, index) => (
