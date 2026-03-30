@@ -21,31 +21,42 @@ export const productReducer = createReducer(initialState, (builder) => {
         })
 
         // get all products of shop
-        .addCase('getAllProductsShopRequest',(state)=>{
-            state.isLoading=true;
+        .addCase('getAllProductsShopRequest', (state) => {
+            state.isLoading = true;
         })
-        .addCase('getAllProductsShopSuccess',(state,action)=>{
-            state.isLoading=false;
-            state.products=action.payload;
+        .addCase('getAllProductsShopSuccess', (state, action) => {
+            state.isLoading = false;
+            state.products = action.payload;
         })
-        .addCase('getAllProductsShopFail',(state,action)=>{
-            state.isLoading=false;
-            state.error=action.payload;
+        .addCase('getAllProductsShopFail', (state, action) => {
+            state.isLoading = false;
+            state.error = action.payload;
         })
 
         // delete product of shop
-         .addCase('deleteProductRequest',(state)=>{
-            state.isLoading=true;
+        .addCase('deleteProductRequest', (state) => {
+            state.isLoading = true;
         })
-        .addCase('deleteProductSuccess',(state,action)=>{
-            state.isLoading=false;
-            state.message=action.payload;
+        .addCase('deleteProductSuccess', (state, action) => {
+            state.isLoading = false;
+            state.message = action.payload;
         })
-        .addCase('deleteProductFail',(state,action)=>{
-            state.isLoading=false;
-            state.error=action.payload;
+        .addCase('deleteProductFail', (state, action) => {
+            state.isLoading = false;
+            state.error = action.payload;
         })
-
+        //get all products
+        .addCase('getAllProductRequests', (state) => {
+            state.isLoading = true;
+        })
+        .addCase('getAllProductSuccess', (state, action) => {
+            state.isLoading = false;
+            state.allProducts = action.payload;
+        })
+        .addCase('getAllProductsFailed', (state, action) => {
+            state.isLoading = false;
+            state.error = action.payload;
+        })
         .addCase("clearErrors", (state) => {
             state.error = null;
         });

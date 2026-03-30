@@ -21,31 +21,42 @@ export const eventReducer = createReducer(initialState, (builder) => {
         })
 
         // get all events of shop
-        .addCase('getAllEventsShopRequest',(state)=>{
-            state.isLoading=true;
+        .addCase('getAllEventsShopRequest', (state) => {
+            state.isLoading = true;
         })
-        .addCase('getAllEventsShopSuccess',(state,action)=>{
-            state.isLoading=false;
-            state.events=action.payload;
+        .addCase('getAllEventsShopSuccess', (state, action) => {
+            state.isLoading = false;
+            state.events = action.payload;
         })
-        .addCase('getAllEventsShopFail',(state,action)=>{
-            state.isLoading=false;
-            state.error=action.payload;
+        .addCase('getAllEventsShopFail', (state, action) => {
+            state.isLoading = false;
+            state.error = action.payload;
         })
 
         // delete event of shop
-         .addCase('deleteEventRequest',(state)=>{
-            state.isLoading=true;
+        .addCase('deleteEventRequest', (state) => {
+            state.isLoading = true;
         })
-        .addCase('deleteEventSuccess',(state,action)=>{
-            state.isLoading=false;
-            state.message=action.payload;
+        .addCase('deleteEventSuccess', (state, action) => {
+            state.isLoading = false;
+            state.message = action.payload;
         })
-        .addCase('deleteEventFail',(state,action)=>{
-            state.isLoading=false;
-            state.error=action.payload;
+        .addCase('deleteEventFail', (state, action) => {
+            state.isLoading = false;
+            state.error = action.payload;
         })
-
+        //get all events
+        .addCase('getAllEventsRequest', (state) => {
+            state.isLoading = true;
+        })
+        .addCase('getAllEventsSuccess', (state, action) => {
+            state.isLoading = false;
+            state.allEvents = action.payload;
+        })
+        .addCase('getAllEventsFailed', (state, action) => {
+            state.isLoading = false;
+            state.error = action.payload;
+        })
         .addCase("clearErrors", (state) => {
             state.error = null;
         });
