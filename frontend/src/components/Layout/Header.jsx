@@ -19,6 +19,7 @@ import Cart from '../Cart/Cart.jsx'
 import WishList from '../WishList/WishList.jsx'
 const Header = ({ activeHeading }) => {
   const { isAuthenticated, user, loading } = useSelector((state) => state.user);
+  const { allProducts } = useSelector((state) => state.products);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchData, setSearchData] = useState(null);
   const [active, setActive] = useState(false);
@@ -27,12 +28,16 @@ const Header = ({ activeHeading }) => {
   const [openWishlist, setOpenWishlist] = useState(false);
   const [open, setOpen] = useState(false);
 
+  const { isSeller } = useSelector((state) => state.shop);
   const handleSearchChange = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
 
-    const filteredProducts = productData && productData.filter((product) => product.name.toLowerCase().includes(term.toLowerCase())
-    );
+    const filteredProducts =
+      allProducts &&
+      allProducts.filter((product) =>
+        product.name.toLowerCase().includes(term.toLowerCase())
+      );
     setSearchData(filteredProducts);
 
   }
@@ -74,15 +79,12 @@ const Header = ({ activeHeading }) => {
               <div className="absolute min-h-[30vh] bg-slate-50 shadow-sm-2 z-[9] p-4">
                 {searchData &&
                   searchData.map((i, index) => {
-                    const d = i.name;
-
-
-                    const product_name = d.replace(/\s+/g, "-")
+                   
                     return (
-                      <Link key={index} to={`/product/${product_name}`}>
+                      <Link to={`/product/${i._id}`}>
                         <div className="w-full flex items-start-py-3">
                           <img
-                            src={`${i.image_Url[0]?.url}`}
+                            src={`${backend_Url}${i.images[0]}`}
                             alt=""
                             className="w-[40px] h-[40px] mr-[10px]"
                           />
@@ -96,9 +98,9 @@ const Header = ({ activeHeading }) => {
           </div>
 
           <div className={`${styles.button}`}>
-            <Link to='/shop-create'>
+            <Link to={`${isSeller ? "/dashboard" : "/shop-create"}`}>
               <h1 className="text-[#fff] flex items-center">
-                Become Seller
+                {isSeller ? "Go Dashboard" : "Become Seller"}{" "}
                 <IoIosArrowForward className="ml-1" />
               </h1>
             </Link>
