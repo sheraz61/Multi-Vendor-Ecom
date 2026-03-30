@@ -26,10 +26,12 @@ import userRouter from './controller/user.js'
 import shopRouter from './controller/shop.js'
 import productRouter from './controller/product.js'
 import eventRouter from './controller/event.controller.js'
+import couponCodeRouter from './controller/couponCode.controller.js'
 app.use('/api/v2/user', userRouter)
 app.use('/api/v2/shop', shopRouter)
 app.use('/api/v2/product', productRouter)
 app.use('/api/v2/event', eventRouter)
+app.use('/api/v2/coupon', couponCodeRouter)
 // it's for ErrorHandling...
 app.use(errorMiddleware)
 export default app
