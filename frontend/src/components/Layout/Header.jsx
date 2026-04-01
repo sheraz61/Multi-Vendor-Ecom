@@ -21,6 +21,7 @@ const Header = ({ activeHeading }) => {
   const { isAuthenticated, user, loading } = useSelector((state) => state.user);
   const { allProducts } = useSelector((state) => state.products);
   const { cart } = useSelector((state) => state.cart);
+  const { wishlist } = useSelector((state) => state.wishlist);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchData, setSearchData] = useState(null);
   const [active, setActive] = useState(false);
@@ -80,7 +81,7 @@ const Header = ({ activeHeading }) => {
               <div className="absolute min-h-[30vh] bg-slate-50 shadow-sm-2 z-[9] p-4">
                 {searchData &&
                   searchData.map((i, index) => {
-                   
+
                     return (
                       <Link to={`/product/${i._id}`}>
                         <div className="w-full flex items-start-py-3">
@@ -145,7 +146,7 @@ const Header = ({ activeHeading }) => {
               >
                 <AiOutlineHeart size={30} color="rgb(255 255 255 / 83%)" />
                 <span className="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px] leading-tight text-center">
-                  0
+                  {wishlist && wishlist.length}
                 </span>
               </div>
             </div>
@@ -176,32 +177,31 @@ const Header = ({ activeHeading }) => {
 
                     </Link>
                   ) : (
-                      <Link to="/login">
-                    <CgProfile size={30} color="rgb(255 255 255 / 83%)" />
-                  </Link>)
+                    <Link to="/login">
+                      <CgProfile size={30} color="rgb(255 255 255 / 83%)" />
+                    </Link>)
                 }
               </div>
             </div>
             {/*cart popup */}
             {
               openCart ? (
-                <Cart setOpenCart={setOpenCart}/>
-              ):null
+                <Cart setOpenCart={setOpenCart} />
+              ) : null
             }
-             {/*wishlist popup */}
+            {/*wishlist popup */}
             {
               openWishlist ? (
-                <WishList setOpenWishlist={setOpenWishlist}/>
-              ):null
+                <WishList setOpenWishlist={setOpenWishlist} />
+              ) : null
             }
           </div>
         </div>
       </div>
       {/* mobile header */}
-       <div
-        className={`${
-          active === true ? "shadow-sm fixed top-0 left-0 z-10" : null
-        }
+      <div
+        className={`${active === true ? "shadow-sm fixed top-0 left-0 z-10" : null
+          }
       w-full h-[60px] bg-[#fff] z-50 top-0 left-0 shadow-sm 800px:hidden`}
       >
         <div className="w-full flex items-center justify-between">
@@ -228,7 +228,7 @@ const Header = ({ activeHeading }) => {
             >
               <AiOutlineShoppingCart size={30} />
               <span class="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px]  leading-tight text-center cursor-pointer">
-               {cart && cart.length}
+                {cart && cart.length}
               </span>
             </div>
           </div>
@@ -253,7 +253,7 @@ const Header = ({ activeHeading }) => {
                   >
                     <AiOutlineHeart size={30} className="mt-5 ml-3" />
                     <span class="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px]  leading-tight text-center cursor-pointer">
-                      0
+                      {wishlist && wishlist.length}
                     </span>
                   </div>
                 </div>

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {
-    AiFillHeart,
-    AiOutlineHeart,
-    AiOutlineMessage,
-    AiOutlineShoppingCart,
+  AiFillHeart,
+  AiOutlineHeart,
+  AiOutlineMessage,
+  AiOutlineShoppingCart,
 } from "react-icons/ai";
 import { RxCross1 } from "react-icons/rx";
 import { Link } from "react-router-dom";
@@ -11,33 +11,45 @@ import styles from "../../../styles/style";
 import { useDispatch, useSelector } from "react-redux";
 import { addTocart } from "../../../redux/actions/cart";
 import { toast } from "react-toastify";
+import {
+  addToWishlist,
+  removeFromWishlist,
+} from "../../../redux/actions/wishlist";
 const ProductDetailsCard = ({ setOpen, data }) => {
-    const dispatch = useDispatch();
-    const { cart } = useSelector((state) => state.cart);
-    const [count, setCount] = useState(1);
-    const [click, setClick] = useState(false);
-
-    const handleMessageSubmit = () => {
-
+  const dispatch = useDispatch();
+  const { cart } = useSelector((state) => state.cart);
+  const { wishlist } = useSelector((state) => state.wishlist);
+  const [count, setCount] = useState(1);
+  const [click, setClick] = useState(false);
+  useEffect(() => {
+    if (wishlist && wishlist.find((i) => i._id === data._id)) {
+      setClick(true);
+    } else {
+      setClick(false);
     }
-    const removeFromWishlistHandler = (data) => {
-    // setClick(!click);
-    // dispatch(removeFromWishlist(data));
+  }, [wishlist]);
+
+  const handleMessageSubmit = () => {
+
+  }
+  const removeFromWishlistHandler = (data) => {
+    setClick(!click);
+    dispatch(removeFromWishlist(data));
   };
 
   const addToWishlistHandler = (data) => {
-    // setClick(!click);
-    // dispatch(addToWishlist(data));
+    setClick(!click);
+    dispatch(addToWishlist(data));
   };
-    const decrementCount = () => {
-        if (count > 1) {
-            setCount(count - 1)
-        }
+  const decrementCount = () => {
+    if (count > 1) {
+      setCount(count - 1)
     }
-    const incrementCount = () => {
-        setCount(count + 1)
-    }
-    const addToCartHandler = (id) => {
+  }
+  const incrementCount = () => {
+    setCount(count + 1)
+  }
+  const addToCartHandler = (id) => {
     const isItemExists = cart && cart.find((i) => i._id === id);
     if (isItemExists) {
       toast.error("Item already in cart!");
@@ -51,8 +63,8 @@ const ProductDetailsCard = ({ setOpen, data }) => {
       }
     }
   };
-    return (
-       <div className="bg-[#fff]">
+  return (
+    <div className="bg-[#fff]">
       {data ? (
         <div className="fixed w-full h-screen top-0 left-0 bg-[#00000030] z-40 flex items-center justify-center">
           <div className="w-[90%] 800px:w-[60%] h-[90vh] overflow-y-scroll 800px:h-[75vh] bg-white rounded-md shadow-sm relative p-4">
@@ -156,7 +168,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
         </div>
       ) : null}
     </div>
-    )
+  )
 }
 
 export default ProductDetailsCard

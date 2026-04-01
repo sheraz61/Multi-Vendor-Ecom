@@ -10,17 +10,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { getAllProductsShop } from "../../redux/actions/product";
 import { server } from "../../server";
 import styles from "../../styles/style";
-// import {
-//   addToWishlist,
-//   removeFromWishlist,
-// } from "../../redux/actions/wishlist";
+import {
+  addToWishlist,
+  removeFromWishlist,
+} from "../../redux/actions/wishlist";
 import { addTocart } from "../../redux/actions/cart";
 import { toast } from "react-toastify";
 import Ratings from "./Ratings";
 import axios from "axios";
 
 function ProductDetails({ data }) {
-    //     const { wishlist } = useSelector((state) => state.wishlist);
+        const { wishlist } = useSelector((state) => state.wishlist);
       const { cart } = useSelector((state) => state.cart);
     const { user, isAuthenticated } = useSelector((state) => state.user);
     const { products } = useSelector((state) => state.products);
@@ -32,11 +32,11 @@ function ProductDetails({ data }) {
 
     useEffect(() => {
         dispatch(getAllProductsShop(data && data?.shop._id));
-        // if (wishlist && wishlist.find((i) => i._id === data?._id)) {
-        //   setClick(true);
-        // } else {
-        //   setClick(false);
-        // }
+        if (wishlist && wishlist.find((i) => i._id === data?._id)) {
+          setClick(true);
+        } else {
+          setClick(false);
+        }
     }, [data]);
 
     const incrementCount = () => {
@@ -47,6 +47,16 @@ function ProductDetails({ data }) {
             setCount(count - 1)
         }
     }
+
+     const removeFromWishlistHandler = (data) => {
+    setClick(!click);
+    dispatch(removeFromWishlist(data));
+  };
+
+  const addToWishlistHandler = (data) => {
+    setClick(!click);
+    dispatch(addToWishlist(data));
+  };
 
     const handleMessageSubmit = () => {
         navigate('/inbox?conversation=38458skjdglnsb3043')
@@ -132,7 +142,7 @@ function ProductDetails({ data }) {
                                             <AiFillHeart
                                                 size={30}
                                                 className="cursor-pointer"
-                                                onClick={() => setClick(!click)}
+                                                onClick={() => removeFromWishlistHandler(data)}
                                                 color={click ? "red" : "#333"}
                                                 title="Remove from wishlist"
                                             />
@@ -140,7 +150,7 @@ function ProductDetails({ data }) {
                                             <AiOutlineHeart
                                                 size={30}
                                                 className="cursor-pointer "
-                                                onClick={() => setClick(!click)}
+                                                onClick={() => addToWishlistHandler(data)}
                                                 color={click ? "red" : "#333"}
                                                 title="Add to wishlist"
                                             />
