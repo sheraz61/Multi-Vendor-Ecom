@@ -10,16 +10,48 @@ import {
 import { Link } from "react-router-dom";
 import styles from "../../../styles/style";
 import { toast } from "react-toastify";
+import { addTocart } from "../../../redux/actions/cart";
 import Ratings from "../../Products/Ratings";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ProductDetailsCard from "../ProductDetailsCard/ProductDetailsCard.jsx";
 const ProductCard = ({ data ,isEvent}) => {
   const [click, setClick] = useState(false);
+  const { cart } = useSelector((state) => state.cart);
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
-  const d = data.name;
-  const product_name = d.replace(/\s+/g, "-")
+  // useEffect(() => {
+  //   if (wishlist && wishlist.find((i) => i._id === data._id)) {
+  //     setClick(true);
+  //   } else {
+  //     setClick(false);
+  //   }
+  // }, [wishlist]);
+
+  // const removeFromWishlistHandler = (data) => {
+  //   setClick(!click);
+  //   dispatch(removeFromWishlist(data));
+  // };
+
+  // const addToWishlistHandler = (data) => {
+  //   setClick(!click);
+  //   dispatch(addToWishlist(data));
+  // };
+
+  const addToCartHandler = (id) => {
+    const isItemExists = cart && cart.find((i) => i._id === id);
+    if (isItemExists) {
+      toast.error("Item already in cart!");
+    } else {
+      if (data.stock < 1) {
+        toast.error("Product stock limited!");
+      } else {
+        const cartData = { ...data, qty: 1 };
+        dispatch(addTocart(cartData));
+        toast.success("Item added to cart successfully!");
+      }
+    }
+  };
   return (
     <div className="w-full h-[370px] bg-white rounded-lg shadow-sm p-3 relative cursor-pointer">
       <div className="flex justify-end"></div>
@@ -85,7 +117,7 @@ const ProductCard = ({ data ,isEvent}) => {
         <AiOutlineShoppingCart
           size={25}
           className="cursor-pointer absolute right-2 top-24"
-          onClick={() => setOpen(!open)}
+          onClick={()=>addToCartHandler(data._id)}
           color="#444"
           title="Add to cart"
         />
