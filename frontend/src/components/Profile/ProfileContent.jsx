@@ -31,7 +31,7 @@ function ProfileContent({ active }) {
   const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState(null);
   const dispatch = useDispatch();
-    useEffect(() => {
+  useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch({ type: "clearErrors" });
@@ -41,8 +41,22 @@ function ProfileContent({ active }) {
       dispatch({ type: "clearMessages" });
     }
   }, [error, successMessage]);
-  const handleImage = () => {
+  const handleImage = async (e) => {
+    const file = e.target.files[0]
+    setAvatar(file)
 
+    const formData = new FormData()
+    formData.append('image', e.target.files[0])
+    await axios.put(`${server}/user/update-avatar`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      withCredentials: true
+    }).then((res) => {
+      window.location.reload()
+    }).catch((err) => {
+      toast.error(err)
+    })
   }
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -447,7 +461,7 @@ const TrackOrder = () => {
   );
 }
 
-const PaymentMethod=()=>{
+const PaymentMethod = () => {
   return (
     <div className='w-full px-5 '>
       <div className="flex w-full items-center justify-between">
@@ -469,7 +483,7 @@ const PaymentMethod=()=>{
           <h5 className='pl-6'>08/26</h5>
         </div>
         <div className="min-w-[10%] flex items-center justify-between pl-8">
-          <AiOutlineDelete size={25} className='cursor-pointer'/>
+          <AiOutlineDelete size={25} className='cursor-pointer' />
         </div>
       </div>
     </div>

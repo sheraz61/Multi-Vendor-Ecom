@@ -202,6 +202,33 @@ router.put("/update-user-info",isAuthenticated,catchAsyncErrors(async (req,res,n
     }
   })
 );
+// updata user avatar
 
+router.put('/update-avatar',isAuthenticated,upload.single('image'),catchAsyncErrors(async(req,res,next)=>{
+    try {
+        const existUser= await User.findById(req.user.id)
+
+        // avatar.url is a web path like "/uploads/file.png" — not a disk path (on Windows unlink would use C:\uploads\...)
+        const oldUrl = existUser?.avatar?.url
+        if (oldUrl && (oldUrl.startsWith('/uploads/') || oldUrl.startsWith('uploads/'))) {
+            const oldDiskPath = path.join(process.cwd(), 'uploads', path.basename(oldUrl))
+            if (fs.existsSync(oldDiskPath)) {
+                fs.unlinkSync(oldDiskPath)
+            }
+        }
+        const filename = req.file.filename
+          const fileUrl = {
+            public_id: filename,           // previously just the filename
+            url: `/uploads/${filename}`
+        }
+        const user = await User.findByIdAndUpdate(req.user.id,{avatar:fileUrl})
+        res.status(201).json({
+            success:true,
+            user,
+        })
+    } catch (error) {
+     return next(new ErrorHandler(error.message, 500));
+    }
+}))
 
 export default router
