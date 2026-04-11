@@ -22,13 +22,25 @@ const userSchema = new mongoose.Schema({
   },
   addresses: [
     {
-      country: String,
-      city: String,
-      address1: String,
-      address2: String,
-      zipCode: Number,
-      addressType: String,
-    },
+      country: {
+        type: String,
+      },
+      city: {
+        type: String,
+      },
+      address1: {
+        type: String,
+      },
+      address2: {
+        type: String,
+      },
+      zipCode: {
+        type: Number,
+      },
+      addressType: {
+        type: String,
+      },
+    }
   ],
   role: {
     type: String,
@@ -53,12 +65,11 @@ const userSchema = new mongoose.Schema({
 });
 
 
-// ✅ Hash password
-userSchema.pre("save", async function (next) {
+// ✅ Hash password (async hook: do not use next — it is undefined here)
+userSchema.pre("save", async function () {
   if (!this.isModified("password")) {
-    next()
+    return;
   }
-
   this.password = await bcrypt.hash(this.password, 10);
 });
 

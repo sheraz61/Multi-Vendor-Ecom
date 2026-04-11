@@ -9,11 +9,18 @@ import styles from "../../styles/style";
 import { DataGrid } from "@mui/x-data-grid";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
-
+import { server } from "../../server";
+import {
+  deleteUserAddress,
+  loadUser,
+  updatUserAddress,
+  updateUserInformation,
+} from "../../redux/actions/user";
 import { MdTrackChanges } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
+import axios from "axios";
 import { backend_Url } from '../../server';
 
 function ProfileContent({ active }) {
@@ -24,13 +31,22 @@ function ProfileContent({ active }) {
   const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState(null);
   const dispatch = useDispatch();
+    useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch({ type: "clearErrors" });
+    }
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch({ type: "clearMessages" });
+    }
+  }, [error, successMessage]);
   const handleImage = () => {
 
   }
   const handleSubmit = (e) => {
     e.preventDefault()
-
-
+    dispatch(updateUserInformation(name, email, phoneNumber, password));
   }
   return (
     <div className='w-full'>

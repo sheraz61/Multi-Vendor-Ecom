@@ -30,7 +30,7 @@ export const updateUserInformation =
         type: "updateUserInfoRequest",
       });
 
-      const { data } = await axios.put(
+      const {data} = await axios.put(
         `${server}/user/update-user-info`,
         {
           email,

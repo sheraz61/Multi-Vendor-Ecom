@@ -37,7 +37,7 @@ function ProductDetails({ data }) {
         } else {
           setClick(false);
         }
-    }, [data]);
+    }, [data,wishlist]);
 
     const incrementCount = () => {
         setCount(count + 1)
