@@ -10,6 +10,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import { server } from "../../server";
+import { Country, State } from 'country-state-city'
 import {
   deleteUserAddress,
   loadUser,
@@ -695,7 +696,7 @@ const Address = () => {
       </div>
       <br />
       {user &&
-        user.addresses.map((item, index) => (
+        user?.addresses?.map((item, index) => (
           <div
             className="w-full bg-white h-min 800px:h-[70px] rounded-[4px] flex items-center px-3 shadow justify-between pr-10 mb-5"
             key={index}

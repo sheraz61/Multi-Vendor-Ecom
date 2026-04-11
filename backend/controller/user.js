@@ -74,23 +74,23 @@ router.post('/activation', catchAsyncErrors(async (req, res, next) => {
     try {
         const { activation_token } = req.body
         const newUser = jwt.verify(activation_token, process.env.ACTIVATION_SECRET)
-        
+
         const { name, email, password, avatar } = newUser;
         let user = await User.findOne({ email });
-       
+
         if (user) {
             return next(new ErrorHandler("User already exists", 400));
         }
 
-        
+
         // Validate required fields
         if (!password) {
             console.error("Password is missing from token");
             return next(new ErrorHandler("Password is missing from activation token", 400));
         }
-        
+
         if (!avatar || !avatar.public_id || !avatar.url) {
-           
+
             return next(new ErrorHandler("Invalid avatar data in activation token", 400));
         }
 
@@ -101,50 +101,50 @@ router.post('/activation', catchAsyncErrors(async (req, res, next) => {
                 avatar,
                 password,
             });
-            
+
             sendToken(user, 201, res);
         } catch (error) {
-           return next(new ErrorHandler(error.message, 500));
+            return next(new ErrorHandler(error.message, 500));
         }
-    } catch (error) {   
+    } catch (error) {
         return next(new ErrorHandler(error.message, 500));
     }
 }))
 
 
 // login user...
-router.post('/login-user',catchAsyncErrors(async(req,res,next)=>{
-try {
-    
-    const {email,password}=req.body;
-    if (!email || !password){
-        return next(new ErrorHandler('Please provide all fields',400))
-    }
-    const user= await User.findOne({email}).select('+password')
-if (!user){
-    return next(new ErrorHandler('User not found',404))
-}
-const isPasswordValid= await user.comparePassword(password)
-if (!isPasswordValid){
-    return next(new ErrorHandler('Wrong password',404))
-}
-sendToken(user,201,res)
-} catch (error) {
+router.post('/login-user', catchAsyncErrors(async (req, res, next) => {
+    try {
+
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return next(new ErrorHandler('Please provide all fields', 400))
+        }
+        const user = await User.findOne({ email }).select('+password')
+        if (!user) {
+            return next(new ErrorHandler('User not found', 404))
+        }
+        const isPasswordValid = await user.comparePassword(password)
+        if (!isPasswordValid) {
+            return next(new ErrorHandler('Wrong password', 404))
+        }
+        sendToken(user, 201, res)
+    } catch (error) {
         return next(new ErrorHandler(error.message, 500));
-}
+    }
 }))
 
 
 // load user 
-router.get('/get-user',isAuthenticated,catchAsyncErrors(async(req,res,next)=>{
+router.get('/get-user', isAuthenticated, catchAsyncErrors(async (req, res, next) => {
     try {
         const user = await User.findById(req.user.id);
-        if (!user){
-    return next(new ErrorHandler('User not found',404))
+        if (!user) {
+            return next(new ErrorHandler('User not found', 404))
 
         }
         res.status(200).json({
-            success:true,
+            success: true,
             user,
         })
     } catch (error) {
@@ -154,15 +154,15 @@ router.get('/get-user',isAuthenticated,catchAsyncErrors(async(req,res,next)=>{
 
 
 //logout user
-router.get('/logout',isAuthenticated,catchAsyncErrors(async(req,res,next)=>{
+router.get('/logout', isAuthenticated, catchAsyncErrors(async (req, res, next) => {
     try {
-        res.cookie('token',null,{
-            expires:new Date(Date.now()),
-            httpOnly:true
+        res.cookie('token', null, {
+            expires: new Date(Date.now()),
+            httpOnly: true
         })
         res.status(201).json({
-            success:true,
-            message:'logout successfully'
+            success: true,
+            message: 'logout successfully'
         })
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
@@ -170,43 +170,43 @@ router.get('/logout',isAuthenticated,catchAsyncErrors(async(req,res,next)=>{
 }))
 
 // update user info
-router.put("/update-user-info",isAuthenticated,catchAsyncErrors(async (req,res,next) => {
+router.put("/update-user-info", isAuthenticated, catchAsyncErrors(async (req, res, next) => {
     try {
-      const { email, password, phoneNumber, name } = req.body;
+        const { email, password, phoneNumber, name } = req.body;
 
-      const user = await User.findOne({ email }).select("+password");
+        const user = await User.findOne({ email }).select("+password");
 
-      if (!user) {
-      return next(new ErrorHandler('user not found', 404));
-      }
+        if (!user) {
+            return next(new ErrorHandler('user not found', 404));
+        }
 
-      const isPasswordValid = await user.comparePassword(password);
+        const isPasswordValid = await user.comparePassword(password);
 
-      if (!isPasswordValid) {
-        return next(new ErrorHandler('please provide correct password...', 500));
-      }
+        if (!isPasswordValid) {
+            return next(new ErrorHandler('please provide correct password...', 500));
+        }
 
 
-      user.name = name;
-      user.email = email;
-      user.phoneNumber = phoneNumber;
+        user.name = name;
+        user.email = email;
+        user.phoneNumber = phoneNumber;
 
-      await user.save();
+        await user.save();
 
-      res.status(201).json({
-        success: true,
-        user,
-      });
+        res.status(201).json({
+            success: true,
+            user,
+        });
     } catch (error) {
-     return next(new ErrorHandler(error.message, 500));
+        return next(new ErrorHandler(error.message, 500));
     }
-  })
+})
 );
 // updata user avatar
 
-router.put('/update-avatar',isAuthenticated,upload.single('image'),catchAsyncErrors(async(req,res,next)=>{
+router.put('/update-avatar', isAuthenticated, upload.single('image'), catchAsyncErrors(async (req, res, next) => {
     try {
-        const existUser= await User.findById(req.user.id)
+        const existUser = await User.findById(req.user.id)
 
         // avatar.url is a web path like "/uploads/file.png" — not a disk path (on Windows unlink would use C:\uploads\...)
         const oldUrl = existUser?.avatar?.url
@@ -217,18 +217,83 @@ router.put('/update-avatar',isAuthenticated,upload.single('image'),catchAsyncErr
             }
         }
         const filename = req.file.filename
-          const fileUrl = {
+        const fileUrl = {
             public_id: filename,           // previously just the filename
             url: `/uploads/${filename}`
         }
-        const user = await User.findByIdAndUpdate(req.user.id,{avatar:fileUrl})
+        const user = await User.findByIdAndUpdate(req.user.id, { avatar: fileUrl })
         res.status(201).json({
-            success:true,
+            success: true,
             user,
         })
     } catch (error) {
-     return next(new ErrorHandler(error.message, 500));
+        return next(new ErrorHandler(error.message, 500));
     }
 }))
+
+// update user addresses
+router.put(
+    "/update-user-addresses",
+    isAuthenticated,
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            const user = await User.findById(req.user.id);
+
+            const sameTypeAddress = user.addresses.find(
+                (address) => address.addressType === req.body.addressType
+            );
+            if (sameTypeAddress) {
+                return next(
+                    new ErrorHandler(`${req.body.addressType} address already exists`)
+                );
+            }
+
+            const existsAddress = user.addresses.find(
+                (address) => address._id === req.body._id
+            );
+
+            if (existsAddress) {
+                Object.assign(existsAddress, req.body);
+            } else {
+                // add the new address to the array
+                user.addresses.push(req.body);
+            }
+
+            await user.save();
+
+            res.status(200).json({
+                success: true,
+                user,
+            });
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
+        }
+    })
+);
+
+// delete user address
+router.delete(
+    "/delete-user-address/:id",
+    isAuthenticated,
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            const userId = req.user._id;
+            const addressId = req.params.id;
+
+            await User.updateOne(
+                {
+                    _id: userId,
+                },
+                { $pull: { addresses: { _id: addressId } } }
+            );
+
+            const user = await User.findById(userId);
+
+            res.status(200).json({ success: true, user });
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
+        }
+    })
+);
 
 export default router
