@@ -23,6 +23,7 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { backend_Url } from '../../server';
+import { getAllOrdersOfUser } from '../../redux/actions/order';
 
 function ProfileContent({ active }) {
   const { user, error, successMessage } = useSelector((state) => state.user);
@@ -186,20 +187,12 @@ function ProfileContent({ active }) {
 
 const AllOrders = () => {
   const { user } = useSelector((state) => state.user);
-  // const { orders } = useSelector((state) => state.order);
+  const { orders } = useSelector((state) => state.orders);
   const dispatch = useDispatch();
-  const orders = [
-    {
-      _id: 'aksjdfoiquv94uv03490',
-      orderItems: [
-        {
-          name: 'iphone 14 pro max',
-        },
-      ],
-      totalPrice: 120,
-      orderStatus: 'Processing'
-    }
-  ]
+  useEffect(()=>{
+dispatch(getAllOrdersOfUser(user._id))
+  },[])
+  
   const columns = [
     { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
 
@@ -254,9 +247,9 @@ const AllOrders = () => {
     orders.forEach((item) => {
       row.push({
         id: item._id,
-        itemsQty: item.orderItems.length,
+        itemsQty: item.cart.length,
         total: "US$ " + item.totalPrice,
-        status: item.orderStatus,
+        status: item.status,
       });
     });
 

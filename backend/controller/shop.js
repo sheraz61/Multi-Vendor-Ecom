@@ -56,6 +56,7 @@ router.post("/create-shop", upload.single('file'), catchAsyncErrors(async (req, 
             activationToken
         )}`;
 
+        
         try {
             await sendMail({
                 email: seller.email,
