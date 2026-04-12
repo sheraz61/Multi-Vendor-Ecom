@@ -1,43 +1,29 @@
 import axios from 'axios'
-import React from 'react'
-import { useEffect } from 'react'
-import { useState } from 'react'
-import { useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import { server } from '../server'
 
 const SellerActivationPage = () => {
-    const { activation_token } = useParams()
-    const [error, setError] = useState(false)
-    const hasRequestedRef = useRef(false)
+    const { activation_token } = useParams();
+    const [error, setError] = useState(false);
     useEffect(() => {
         if (activation_token) {
-            // React 18 StrictMode runs effects twice in dev; prevent duplicate POST.
-            if (hasRequestedRef.current) return
-            hasRequestedRef.current = true
-
-            const sendRequest = async () => {
-                try {
-                    // console.log('activation request sending');
-                    const res = await axios.post(`${server}/shop/activation`, { activation_token });
-                    console.log('Activation response:', res.data);
-                    
-                    // Check if the response indicates success
-                    if (res.data.success === false) {
-                        console.error("Activation failed:", res.data.message);
-                        setError(true);
-                    } else {
-                        console.log("Shop activated successfully!");
-                    }
-                } catch (err) {
-                    console.log("Activation error:", err);
-                    console.log("Error response:", err.response?.data);
-                    setError(true);
-                }
-            }
-            sendRequest();
+          const sendRequest = async () => {
+            await axios
+              .post(`${server}/shop/activation`, {
+                activation_token,
+              })
+              .then((res) => {
+                console.log(res);
+              })
+              .catch((err) => {
+                setError(true);
+              });
+          };
+          sendRequest();
         }
-    }, [activation_token])
+      }, []);
     return (
         <div
             style={{
@@ -49,9 +35,9 @@ const SellerActivationPage = () => {
             }}
         >
             {error ? (
-                <p>Your token is expired!</p>
+                <p>your token is expired!</p>
             ) : (
-                <p>Your account has been created suceessfully!</p>
+                <p>Your shop has been activated suceessfully!</p>
             )}
         </div>
     )

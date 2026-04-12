@@ -1,7 +1,7 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { LoginPage, SignupPage, ActivationPage, HomePage, EventsPage, ProductPage, BestSellingPage, FAQPage, ProductDetailsPage, ProfilePage, CheckoutPage, PaymentPage, OrderSuccessPage, ShopCreatePage, SellerActivationPage, ShopLoginPage } from './routes/Routes.js'
-import { ShopHomePage, ShopDashboardPage, ShopCreateProduct, ShopAllProduct, ShopCreateEvents, ShopAllEvent, ShopAllCoupons, ShopPreviewPage} from './routes/ShopRoutes.js'
+import { ShopHomePage, ShopDashboardPage, ShopCreateProduct, ShopAllProduct, ShopCreateEvents, ShopAllEvent, ShopAllCoupons, ShopPreviewPage } from './routes/ShopRoutes.js'
 import { ToastContainer, toast } from 'react-toastify';
 import { useEffect } from 'react';
 import Store from './redux/store';
@@ -13,7 +13,7 @@ import { getAllEvents } from "./redux/actions/event";
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
 import SellerProtectedRoute from './routes/SellerProtectedRoute.jsx';
 const App = () => {
- const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(loadUser());
@@ -47,7 +47,7 @@ const App = () => {
               <ProfilePage />
             </ProtectedRoute>
           } />
-<Route path="/shop/preview/:id" element={<ShopPreviewPage />} />
+          <Route path="/shop/preview/:id" element={<ShopPreviewPage />} />
           <Route path='/shop-create' element={<ShopCreatePage />} />
           <Route path='/shop-login' element={<ShopLoginPage />} />
           <Route path='/shop/:id' element={

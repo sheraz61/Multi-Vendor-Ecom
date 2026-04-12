@@ -49,7 +49,12 @@ router.post("/create-shop", upload.single('file'), catchAsyncErrors(async (req, 
 
         const activationToken = createActivationToken(seller);
 
-        const activationUrl = `http://localhost:5173/shop/activation/${activationToken}`;
+        const frontendBase =
+            process.env.FRONTEND_URL || "http://localhost:5173";
+        // Query param avoids JWT dots being treated oddly in paths; encode for email clients.
+        const activationUrl = `${frontendBase}/shop/activation/${encodeURIComponent(
+            activationToken
+        )}`;
 
         try {
             await sendMail({
@@ -72,7 +77,7 @@ router.post("/create-shop", upload.single('file'), catchAsyncErrors(async (req, 
 // create activation token
 const createActivationToken = (seller) => {
     return jwt.sign(seller, process.env.ACTIVATION_SECRET, {
-        expiresIn: "5m",
+        expiresIn: "24h",
     });
 };
 
