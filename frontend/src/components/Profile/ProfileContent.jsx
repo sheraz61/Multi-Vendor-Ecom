@@ -189,10 +189,10 @@ const AllOrders = () => {
   const { user } = useSelector((state) => state.user);
   const { orders } = useSelector((state) => state.orders);
   const dispatch = useDispatch();
-  useEffect(()=>{
-dispatch(getAllOrdersOfUser(user._id))
-  },[])
-  
+  useEffect(() => {
+    dispatch(getAllOrdersOfUser(user._id))
+  }, [])
+
   const columns = [
     { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
 
@@ -268,25 +268,14 @@ dispatch(getAllOrdersOfUser(user._id))
 
 const AllRefundOrders = () => {
   const { user } = useSelector((state) => state.user);
-  // const { orders } = useSelector((state) => state.order);
+  const { orders } = useSelector((state) => state.orders);
   const dispatch = useDispatch();
 
-
-  const orders = [
-    {
-      _id: 'aksjdfoiquv94uv03490',
-      orderItems: [
-        {
-          name: 'iphone 14 pro max',
-        },
-      ],
-      totalPrice: 120,
-      orderStatus: 'Processing'
-    }
-  ]
   const eligibleOrders =
     orders && orders.filter((item) => item.status === "Processing refund");
-
+  useEffect(() => {
+    dispatch(getAllOrdersOfUser(user._id));
+  }, []);
   const columns = [
     { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
 
@@ -338,13 +327,13 @@ const AllRefundOrders = () => {
 
   const row = [];
 
-  orders &&
-    orders.forEach((item) => {
+  eligibleOrders &&
+    eligibleOrders.forEach((item) => {
       row.push({
         id: item._id,
-        itemsQty: item.orderItems.length,
+        itemsQty: item.cart.length,
         total: "US$ " + item.totalPrice,
-        status: item.orderStatus,
+        status: item.status,
       });
     });
 
@@ -362,25 +351,14 @@ const AllRefundOrders = () => {
 };
 
 const TrackOrder = () => {
-  //  const { user } = useSelector((state) => state.user);
-  // const { orders } = useSelector((state) => state.order);
-  // const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.user);
+  const { orders } = useSelector((state) => state.orders);
+  const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   dispatch(getAllOrdersOfUser(user._id));
-  // }, []);
-  const orders = [
-    {
-      _id: 'aksjdfoiquv94uv03490',
-      orderItems: [
-        {
-          name: 'iphone 14 pro max',
-        },
-      ],
-      totalPrice: 120,
-      orderStatus: 'Processing'
-    }
-  ]
+  useEffect(() => {
+    dispatch(getAllOrdersOfUser(user._id));
+  }, []);
+
   const columns = [
     { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
 
@@ -436,9 +414,9 @@ const TrackOrder = () => {
     orders.forEach((item) => {
       row.push({
         id: item._id,
-        itemsQty: item.orderItems.length,
+        itemsQty: item.cart.length,
         total: "US$ " + item.totalPrice,
-        status: item.orderStatus,
+        status: item.status,
       });
     });
 

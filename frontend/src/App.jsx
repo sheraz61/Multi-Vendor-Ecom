@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
-import { LoginPage, SignupPage, ActivationPage, HomePage, EventsPage, ProductPage, BestSellingPage, FAQPage, ProductDetailsPage, ProfilePage, CheckoutPage, PaymentPage, OrderSuccessPage, ShopCreatePage, SellerActivationPage, ShopLoginPage } from './routes/Routes.js'
-import { ShopHomePage, ShopDashboardPage, ShopCreateProduct, ShopAllProduct, ShopCreateEvents, ShopAllEvent, ShopAllCoupons, ShopPreviewPage } from './routes/ShopRoutes.js'
+import { LoginPage, SignupPage, ActivationPage, HomePage, EventsPage, ProductPage, BestSellingPage, FAQPage, ProductDetailsPage, ProfilePage, CheckoutPage, PaymentPage, OrderSuccessPage, ShopCreatePage, SellerActivationPage, ShopLoginPage ,OrderDetailsPage,TrackOrderPage} from './routes/Routes.js'
+import { ShopHomePage, ShopDashboardPage, ShopCreateProduct, ShopAllProduct, ShopCreateEvents, ShopAllEvent, ShopAllCoupons, ShopPreviewPage ,ShopAllOrders,ShopOrderDetails,ShopAllRefunds} from './routes/ShopRoutes.js'
 import { ToastContainer, toast } from 'react-toastify';
 import { useEffect } from 'react';
 import Store from './redux/store';
@@ -35,20 +35,6 @@ async function getStripeApikey() {
   return (
     <>
       <BrowserRouter>
-       {stripeApiKey && (
-        <Elements stripe={loadStripe(stripeApiKey)}>
-          <Routes>
-            <Route
-              path="/payment"
-              element={
-                <ProtectedRoute>
-                  <PaymentPage />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </Elements>
-      )}
         <Routes>
           <Route path='/' element={<HomePage />} />
           <Route path='/login' element={<LoginPage />} />
@@ -65,10 +51,32 @@ async function getStripeApikey() {
               <CheckoutPage />
             </ProtectedRoute>
           } />
+          <Route
+            path="/payment"
+            element={
+              <ProtectedRoute>
+                {stripeApiKey ? (
+                  <Elements stripe={loadStripe(stripeApiKey)}>
+                    <PaymentPage />
+                  </Elements>
+                ) : null}
+              </ProtectedRoute>
+            }
+          />
           <Route path='/order/success/' element={<OrderSuccessPage />} />
           <Route path='/profile' element={
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          } />
+          <Route path='/user/order/:id' element={
+            <ProtectedRoute>
+              <OrderDetailsPage />
+            </ProtectedRoute>
+          } />
+          <Route path='/user/track/order/:id' element={
+            <ProtectedRoute>
+              <TrackOrderPage />
             </ProtectedRoute>
           } />
           <Route path="/shop/preview/:id" element={<ShopPreviewPage />} />
@@ -86,6 +94,13 @@ async function getStripeApikey() {
               <ShopDashboardPage />
             </SellerProtectedRoute>
           } />
+          <Route path='/order/:id' element={
+            <SellerProtectedRoute
+            >
+              <ShopOrderDetails />
+            </SellerProtectedRoute>
+          } />
+          
           <Route path='/dashboard-create-product' element={
             <SellerProtectedRoute
             >
@@ -110,10 +125,22 @@ async function getStripeApikey() {
               <ShopAllEvent />
             </SellerProtectedRoute>
           } />
+          <Route path='/dashboard-orders' element={
+            <SellerProtectedRoute
+            >
+              <ShopAllOrders />
+            </SellerProtectedRoute>
+          } />
           <Route path='/dashboard-coupons' element={
             <SellerProtectedRoute
             >
               <ShopAllCoupons />
+            </SellerProtectedRoute>
+          } />
+          <Route path='/dashboard-refunds' element={
+            <SellerProtectedRoute
+            >
+              <ShopAllRefunds />
             </SellerProtectedRoute>
           } />
 
