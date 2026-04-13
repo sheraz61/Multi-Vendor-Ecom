@@ -22,10 +22,11 @@ const ShopProfileData = ({ isOwner }) => {
 
   const [active, setActive] = useState(1);
 
-//   const allReviews =
-//     products && products.map((product) => product.reviews).flat();
+  const allReviews =
+    products && products.map((product) => product.reviews).flat();
 
   return (
+      
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
         <div className="w-full flex">
@@ -102,7 +103,7 @@ const ShopProfileData = ({ isOwner }) => {
         </div>
       )}
 
-      {/* {active === 3 && (
+       {active === 3 && (
         <div className="w-full">
           {allReviews &&
             allReviews.map((item, index) => (
@@ -118,7 +119,7 @@ const ShopProfileData = ({ isOwner }) => {
                     <Ratings rating={item.rating} />
                   </div>
                   <p className="font-[400] text-[#000000a7]">{item?.comment}</p>
-                  <p className="text-[#000000a7] text-[14px]">{"2days ago"}</p>
+                  <p className="text-[#000000a7] text-[14px]">{item.createdAt}</p>
                 </div>
               </div>
             ))}
@@ -126,11 +127,11 @@ const ShopProfileData = ({ isOwner }) => {
             <h5 className="w-full text-center py-5 text-[18px]">
               No Reviews have for this shop!
             </h5>
-          )} */}
-        
-    
-    </div>
-  );
-};
+          )} 
+         </div>
+        )} </div>
+  )};
+
+  
 
 export default ShopProfileData;

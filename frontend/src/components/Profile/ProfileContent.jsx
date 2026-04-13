@@ -55,7 +55,8 @@ function ProfileContent({ active }) {
       },
       withCredentials: true
     }).then((res) => {
-      window.location.reload()
+      dispatch(loadUser())
+      toast.success('Avatar change successfully')
     }).catch((err) => {
       toast.error(err)
     })

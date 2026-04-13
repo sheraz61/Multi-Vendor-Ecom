@@ -9,7 +9,8 @@ import ShopPreviewPage from '../pages/Shop/ShopPreviewPage.jsx'
 import ShopAllOrders from '../pages/Shop/ShopAllOrders.jsx'
 import ShopOrderDetails from '../pages/Shop/ShopOrderDetails.jsx'
 import ShopAllRefunds from '../pages/Shop/ShopAllRefunds.jsx'
+import ShopSettingsPage from '../pages/Shop/ShopSettingsPage.jsx'
 
 export {
-    ShopHomePage,ShopDashboardPage,ShopCreateProduct,ShopAllProduct,ShopCreateEvents,ShopAllEvent,ShopAllCoupons,ShopPreviewPage,ShopAllOrders,ShopOrderDetails,ShopAllRefunds
+    ShopHomePage,ShopDashboardPage,ShopCreateProduct,ShopAllProduct,ShopCreateEvents,ShopAllEvent,ShopAllCoupons,ShopPreviewPage,ShopAllOrders,ShopOrderDetails,ShopAllRefunds,ShopSettingsPage
 }

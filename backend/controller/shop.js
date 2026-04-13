@@ -56,7 +56,7 @@ router.post("/create-shop", upload.single('file'), catchAsyncErrors(async (req, 
             activationToken
         )}`;
 
-        
+
         try {
             await sendMail({
                 email: seller.email,
@@ -184,15 +184,15 @@ router.get('/get-seller', isSeller, catchAsyncErrors(async (req, res, next) => {
 }))
 
 //logout from shop
-router.get('/shop-logout',isSeller,catchAsyncErrors(async(req,res,next)=>{
+router.get('/shop-logout', isSeller, catchAsyncErrors(async (req, res, next) => {
     try {
-        res.cookie('seller_token',null,{
-            expires:new Date(Date.now()),
-            httpOnly:true
+        res.cookie('seller_token', null, {
+            expires: new Date(Date.now()),
+            httpOnly: true
         })
         res.status(201).json({
-            success:true,
-            message:'logout successfully'
+            success: true,
+            message: 'logout successfully'
         })
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
@@ -201,17 +201,91 @@ router.get('/shop-logout',isSeller,catchAsyncErrors(async(req,res,next)=>{
 
 // get shop info
 router.get(
-  "/get-shop-info/:id",
-  catchAsyncErrors(async (req, res, next) => {
-    try {
-      const shop = await Shop.findById(req.params.id);
-      res.status(201).json({
-        success: true,
-        shop,
-      });
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
-    }
-  })
+    "/get-shop-info/:id",
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            const shop = await Shop.findById(req.params.id);
+            res.status(201).json({
+                success: true,
+                shop,
+            });
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
+        }
+    })
 );
+
+
+// update shop profile picture
+router.put(
+    "/update-shop-avatar",
+    isSeller,
+    upload.single('file'),
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            if (!req.file) {
+                return next(new ErrorHandler("Please upload avatar file", 400));
+            }
+            const existUser = await Shop.findById(req.seller.id)
+            
+            
+            // avatar.url is a web path like "/uploads/file.png" — not a disk path (on Windows unlink would use C:\uploads\...)
+            const oldUrl = existUser?.avatar?.url
+            if (oldUrl && (oldUrl.startsWith('/uploads/') || oldUrl.startsWith('uploads/'))) {
+                const oldDiskPath = path.join(process.cwd(), 'uploads', path.basename(oldUrl))
+                if (fs.existsSync(oldDiskPath)) {
+                    fs.unlinkSync(oldDiskPath)
+                }
+            }
+            
+            
+            const filename = req.file.filename
+            const fileUrl = {
+                public_id: filename,           // previously just the filename
+                url: `/uploads/${filename}`
+            }
+            const seller = await Shop.findByIdAndUpdate(req.seller.id, { avatar: fileUrl })
+            res.status(201).json({
+                success: true,
+                seller,
+            })
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
+        }
+    })
+);
+
+// update seller info
+router.put(
+    "/update-seller-info",
+    isSeller,
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            const { name, description, address, phoneNumber, zipCode } = req.body;
+
+            const shop = await Shop.findById(req.seller._id);
+
+            if (!shop) {
+                return next(new ErrorHandler("User not found", 400));
+            }
+
+            shop.name = name;
+            shop.description = description;
+            shop.address = address;
+            shop.phoneNumber = phoneNumber;
+            shop.zipCode = zipCode;
+
+            await shop.save();
+
+            res.status(201).json({
+                success: true,
+                shop,
+            });
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
+        }
+    })
+);
+
+
 export default router
