@@ -72,7 +72,7 @@ const ProductCard = ({ data, isEvent }) => {
           {data.name.length > 40 ? data.name.slice(0, 40) + "..." : data.name}
         </h4>
         <div className="flex">
-          <Ratings rating={4.5 / 5} />
+          <Ratings rating={data?.ratings} />
         </div>
 
 
