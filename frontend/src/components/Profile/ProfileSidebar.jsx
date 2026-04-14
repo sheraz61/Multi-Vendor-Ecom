@@ -121,7 +121,7 @@ function ProfileSidebar({ setActive, active }) {
             </div>
 
             {user && user?.role === "Admin" && (
-                <Link to="/admin/dashboard">
+                <Link to="/admin-dashboard">
                     <div
                         className="flex items-center cursor-pointer w-full mb-8"
                         onClick={() => setActive(8)}

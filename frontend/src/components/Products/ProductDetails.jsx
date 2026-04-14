@@ -95,9 +95,10 @@ function ProductDetails({ data }) {
   };
 
 
+
   const totalReviewsLength =
     products &&
-    products.reduce((acc, product) => acc + product.reviews.length, 0);
+    products.reduce((acc, product) => acc + product?.reviews?.length, 0);
 
   const totalRatings =
     products &&
@@ -302,8 +303,9 @@ const ProductdetailsInfo = ({ data, products,
       {active === 2 ? (
         <div className="w-full min-h-[40vh] flex flex-col items-center py-3 overflow-y-scroll">
           {data &&
-            data.reviews.map((item, index) => (
-              <div key={index} className="w-full flex my-2">
+          
+            data?.reviews?.map((item, index) => (
+              <div className="w-full flex my-2">
                 <img
                   src={`${item.user.avatar?.url}`}
                   alt=""
@@ -320,7 +322,7 @@ const ProductdetailsInfo = ({ data, products,
             ))}
 
           <div className="w-full flex justify-center">
-            {data && data.reviews.length === 0 && (
+            {data && data?.reviews?.length === 0 && (
               <h5>No Reviews have for this product!</h5>
             )}
           </div>

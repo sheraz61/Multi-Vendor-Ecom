@@ -13,7 +13,6 @@ const WithdrawMoney = () => {
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const { seller } = useSelector((state) => state.shop);
-  const { orders } = useSelector((state) => state.orders);
   const [paymentMethod, setPaymentMethod] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState(50);
   const [deliveredOrder, setDeliveredOrder] = useState(null);
@@ -28,9 +27,7 @@ const WithdrawMoney = () => {
 
   useEffect(() => {
     dispatch(getAllOrdersOfShop(seller._id));
-    const orderData=orders && orders.filter((items)=>items.status==='Delivered')
-setDeliveredOrder(orderData)
-
+   
   }, [dispatch]);
 
   const handleSubmit = async (e) => {
@@ -100,13 +97,13 @@ setDeliveredOrder(orderData)
         )
         .then((res) => {
           toast.success("Withdraw money request is successful!");
+          dispatch(loadSeller());
+          setOpen(false)
         });
     }
   };
 
-const totalEarnings=deliveredOrder && deliveredOrder.reduce((acc,item)=>acc+item.totalPrice,0)
-const serviceCharge=totalEarnings * 0.1
-const availableBalance=totalEarnings-serviceCharge || 0
+ const availableBalance = seller?.availableBalance.toFixed(2);
   return (
     <div className="w-full h-[90vh] p-8">
       <div className="w-full bg-white h-full rounded flex items-center justify-center flex-col">

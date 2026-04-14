@@ -14,20 +14,14 @@ const DashboardHero = () => {
   const { orders } = useSelector((state) => state.orders);
   const { seller } = useSelector((state) => state.shop);
   const { products } = useSelector((state) => state.products);
-  const [deliveredOrder, setDeliveredOrder] = useState(null)
 
   useEffect(() => {
     dispatch(getAllOrdersOfShop(seller._id));
     dispatch(getAllProductsShop(seller._id));
-    const orderData = orders && orders.filter((item) => item.status ===
-      'Delivered')
-    setDeliveredOrder(orderData)
   }, [dispatch]);
 
 
-  const totalEarningWithoutTax = deliveredOrder ? deliveredOrder.reduce((acc, item) => acc + item.totalPrice, 0): 0
-  const serviceCharge = totalEarningWithoutTax * 0.1 || 0
-  const availableBalance = totalEarningWithoutTax - serviceCharge.toFixed(2) || 0
+   const availableBalance = seller?.availableBalance.toFixed(2);
   const columns = [
     { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
 
@@ -68,7 +62,7 @@ const DashboardHero = () => {
       renderCell: (params) => {
         return (
           <>
-            <Link to={`/dashboard/order/${params.id}`}>
+            <Link to={`/order/${params.id}`}>
               <Button>
                 <AiOutlineArrowRight size={20} />
               </Button>
