@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { LoginPage, SignupPage, ActivationPage, HomePage, EventsPage, ProductPage, BestSellingPage, FAQPage, ProductDetailsPage, ProfilePage, CheckoutPage, PaymentPage, OrderSuccessPage, ShopCreatePage, SellerActivationPage, ShopLoginPage ,OrderDetailsPage,TrackOrderPage,UserInbox} from './routes/Routes.js'
 import { ShopHomePage, ShopDashboardPage, ShopCreateProduct, ShopAllProduct, ShopCreateEvents, ShopAllEvent, ShopAllCoupons, ShopPreviewPage ,ShopAllOrders,ShopOrderDetails,ShopAllRefunds,ShopSettingsPage,ShopWithdrawMoneyPage,ShopInboxPage} from './routes/ShopRoutes.js'
+import {AdminDashboardPage} from './routes/AdminRoutes.js'
 import { ToastContainer, toast } from 'react-toastify';
 import { useEffect } from 'react';
 import Store from './redux/store';
@@ -16,6 +17,7 @@ import {Elements} from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';
 import { server } from './server.js';
+import ProtectedAdminRoute from './routes/ProtectedAdminRoute.jsx'
 const App = () => {
   const dispatch = useDispatch();
 const [stripeApiKey,setStripeApiKey]=useState('')
@@ -166,6 +168,13 @@ async function getStripeApikey() {
               <ShopSettingsPage />
             </SellerProtectedRoute>
           } />
+
+
+          <Route path='/admin/dashboard' element={
+            <ProtectedAdminRoute>
+            <AdminDashboardPage />
+            </ProtectedAdminRoute>
+        } />
 
         </Routes>
         <ToastContainer

@@ -120,7 +120,7 @@ function ProfileSidebar({ setActive, active }) {
                 </span>
             </div>
 
-            {/* {user && user?.role === "Admin" && (
+            {user && user?.role === "Admin" && (
                 <Link to="/admin/dashboard">
                     <div
                         className="flex items-center cursor-pointer w-full mb-8"
@@ -138,7 +138,7 @@ function ProfileSidebar({ setActive, active }) {
                         </span>
                     </div>
                 </Link>
-            )} */}
+            )}
             <div
                 className="single_item flex items-center cursor-pointer w-full mb-8"
                 onClick={logoutHandler}

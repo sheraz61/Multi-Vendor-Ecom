@@ -9,7 +9,7 @@ import sendMail from '../utils/sendMail.js'
 import fs from "fs";
 import catchAsyncErrors from '../middleware/catchAsyncErrors.js'
 import sendShopToken from '../utils/shopToken.js'
-import { isAuthenticated, isSeller } from '../middleware/auth.js'
+import { isAdmin, isAuthenticated, isSeller } from '../middleware/auth.js'
 const router = Router()
 
 // create shop
@@ -285,6 +285,26 @@ router.put(
             return next(new ErrorHandler(error.message, 500));
         }
     })
+);
+
+// all sellers --- for admin
+router.get(
+  "/admin-all-sellers",
+  isAuthenticated,
+  isAdmin("Admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const sellers = await Shop.find().sort({
+        createdAt: -1,
+      });
+      res.status(201).json({
+        success: true,
+        sellers,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
 );
 
 
