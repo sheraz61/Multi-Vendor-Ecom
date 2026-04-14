@@ -14,21 +14,21 @@ const DashboardHero = () => {
   const { orders } = useSelector((state) => state.orders);
   const { seller } = useSelector((state) => state.shop);
   const { products } = useSelector((state) => state.products);
-  const [deliveredOrder,setDeliveredOrder]=useState(null)
+  const [deliveredOrder, setDeliveredOrder] = useState(null)
 
   useEffect(() => {
-     dispatch(getAllOrdersOfShop(seller._id));
-     dispatch(getAllProductsShop(seller._id));
-     const orderData = orders && orders.filter((item)=>item.status===
-  'Delivered')
-  setDeliveredOrder(orderData)
+    dispatch(getAllOrdersOfShop(seller._id));
+    dispatch(getAllProductsShop(seller._id));
+    const orderData = orders && orders.filter((item) => item.status ===
+      'Delivered')
+    setDeliveredOrder(orderData)
   }, [dispatch]);
 
 
-  const totalEarningWithoutTax =deliveredOrder && deliveredOrder.reduce((acc,item)=>acc+item.totalPrice,0);
-const  serviceCharge = totalEarningWithoutTax * 0.1
-const availableBalance = totalEarningWithoutTax-serviceCharge.toFixed(2)
-  const columns = [ 
+  const totalEarningWithoutTax = deliveredOrder ? deliveredOrder.reduce((acc, item) => acc + item.totalPrice, 0): 0
+  const serviceCharge = totalEarningWithoutTax * 0.1 || 0
+  const availableBalance = totalEarningWithoutTax - serviceCharge.toFixed(2) || 0
+  const columns = [
     { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
 
     {
@@ -83,11 +83,11 @@ const availableBalance = totalEarningWithoutTax-serviceCharge.toFixed(2)
 
   orders && orders.forEach((item) => {
     row.push({
-        id: item._id,
-        itemsQty: item.cart.reduce((acc, item) => acc + item.qty, 0),
-        total: "US$ " + item.totalPrice,
-        status: item.status,
-      });
+      id: item._id,
+      itemsQty: item.cart.reduce((acc, item) => acc + item.qty, 0),
+      total: "US$ " + item.totalPrice,
+      status: item.status,
+    });
   });
   return (
     <div className="w-full p-8">
@@ -150,13 +150,13 @@ const availableBalance = totalEarningWithoutTax-serviceCharge.toFixed(2)
       <br />
       <h3 className="text-[22px] font-Poppins pb-2">Latest Orders</h3>
       <div className="w-full min-h-[45vh] bg-white rounded">
-      <DataGrid
-        rows={row}
-        columns={columns}
-        pageSize={10}
-        disableSelectionOnClick
-        autoHeight
-      />
+        <DataGrid
+          rows={row}
+          columns={columns}
+          pageSize={10}
+          disableSelectionOnClick
+          autoHeight
+        />
       </div>
     </div>
   );

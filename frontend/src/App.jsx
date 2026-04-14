@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
-import { LoginPage, SignupPage, ActivationPage, HomePage, EventsPage, ProductPage, BestSellingPage, FAQPage, ProductDetailsPage, ProfilePage, CheckoutPage, PaymentPage, OrderSuccessPage, ShopCreatePage, SellerActivationPage, ShopLoginPage ,OrderDetailsPage,TrackOrderPage} from './routes/Routes.js'
-import { ShopHomePage, ShopDashboardPage, ShopCreateProduct, ShopAllProduct, ShopCreateEvents, ShopAllEvent, ShopAllCoupons, ShopPreviewPage ,ShopAllOrders,ShopOrderDetails,ShopAllRefunds,ShopSettingsPage} from './routes/ShopRoutes.js'
+import { LoginPage, SignupPage, ActivationPage, HomePage, EventsPage, ProductPage, BestSellingPage, FAQPage, ProductDetailsPage, ProfilePage, CheckoutPage, PaymentPage, OrderSuccessPage, ShopCreatePage, SellerActivationPage, ShopLoginPage ,OrderDetailsPage,TrackOrderPage,UserInbox} from './routes/Routes.js'
+import { ShopHomePage, ShopDashboardPage, ShopCreateProduct, ShopAllProduct, ShopCreateEvents, ShopAllEvent, ShopAllCoupons, ShopPreviewPage ,ShopAllOrders,ShopOrderDetails,ShopAllRefunds,ShopSettingsPage,ShopWithdrawMoneyPage,ShopInboxPage} from './routes/ShopRoutes.js'
 import { ToastContainer, toast } from 'react-toastify';
 import { useEffect } from 'react';
 import Store from './redux/store';
@@ -49,6 +49,11 @@ async function getStripeApikey() {
           <Route path='/checkout' element={
             <ProtectedRoute>
               <CheckoutPage />
+            </ProtectedRoute>
+          } />
+          <Route path='/inbox' element={
+            <ProtectedRoute>
+              <UserInbox />
             </ProtectedRoute>
           } />
           <Route
@@ -141,6 +146,18 @@ async function getStripeApikey() {
             <SellerProtectedRoute
             >
               <ShopAllRefunds />
+            </SellerProtectedRoute>
+          } />
+          <Route path='/dashboard-withdraw-money' element={
+            <SellerProtectedRoute
+            >
+              <ShopWithdrawMoneyPage />
+            </SellerProtectedRoute>
+          } />
+          <Route path='/dashboard-messages' element={
+            <SellerProtectedRoute
+            >
+              <ShopInboxPage />
             </SellerProtectedRoute>
           } />
           <Route path='/settings' element={

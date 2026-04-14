@@ -16,6 +16,7 @@ import SellerActivationPage from '../pages/SellerActivationPage.jsx'
 import ShopLoginPage from '../pages/ShopLoginPage.jsx'
 import OrderDetailsPage from '../pages/OrderDetailsPage.jsx'
 import TrackOrderPage from '../pages/TrackOrderPage.jsx'
+import UserInbox from '../pages/UserInbox.jsx'
 export {
-    LoginPage,SignupPage,ActivationPage,HomePage,ProductPage,BestSellingPage,EventsPage,FAQPage,ProductDetailsPage,ProfilePage,CheckoutPage,OrderSuccessPage,PaymentPage ,ShopCreatePage,SellerActivationPage,ShopLoginPage,OrderDetailsPage,TrackOrderPage
+    LoginPage,SignupPage,ActivationPage,HomePage,ProductPage,BestSellingPage,EventsPage,FAQPage,ProductDetailsPage,ProfilePage,CheckoutPage,OrderSuccessPage,PaymentPage ,ShopCreatePage,SellerActivationPage,ShopLoginPage,OrderDetailsPage,TrackOrderPage,UserInbox
 }
