@@ -3,8 +3,8 @@ import catchAsyncErrors from '../middleware/catchAsyncErrors.js'
 import ErrorHandler from '../utils/ErrorHandler.js'
 import { isAuthenticated, isSeller,isAdmin } from '../middleware/auth.js'
 import Order from '../model/order.model.js'
-import Shop from '../model/shop.js'
-import Product from '../model/product.js'
+import Shop from '../model/shop.model.js'
+import Product from '../model/product.model.js'
 
 const router = Router()
 // create new order
@@ -138,6 +138,8 @@ router.put(
       if (req.body.status === "Delivered") {
         order.deliveredAt = Date.now();
         order.paymentInfo.status = "Succeeded";
+        const serviceCharge = order.totalPrice * .10;
+        await updateSellerInfo(order.totalPrice - serviceCharge);
       }
 
       await order.save({ validateBeforeSave: false });
@@ -156,12 +158,19 @@ router.put(
         await product.save({ validateBeforeSave: false });
       }
 
-     
+      async function updateSellerInfo(amount) {
+        const seller = await Shop.findById(req.seller.id);
+        
+        seller.availableBalance = amount;
+
+        await seller.save();
+      }
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
   })
 );
+
 
 
 // accept the refund ---- seller

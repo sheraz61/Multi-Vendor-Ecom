@@ -2,7 +2,7 @@ import express from 'express'
 import path from 'path'
 import { Router } from 'express'
 import { upload } from '../multer.js'
-import Shop from '../model/shop.js'
+import Shop from '../model/shop.model.js'
 import ErrorHandler from '../utils/ErrorHandler.js'
 import jwt from 'jsonwebtoken'
 import sendMail from '../utils/sendMail.js'
@@ -300,6 +300,81 @@ router.get(
       res.status(201).json({
         success: true,
         sellers,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// delete seller ---admin
+router.delete(
+  "/delete-seller/:id",
+  isAuthenticated,
+  isAdmin("Admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const seller = await Shop.findById(req.params.id);
+
+      if (!seller) {
+        return next(
+          new ErrorHandler("Seller is not available with this id", 400)
+        );
+      }
+
+      await Shop.findByIdAndDelete(req.params.id);
+
+      res.status(201).json({
+        success: true,
+        message: "Seller deleted successfully!",
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// update seller withdraw methods --- sellers
+router.put(
+  "/update-payment-methods",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const { withdrawMethod } = req.body;
+
+      const seller = await Shop.findByIdAndUpdate(req.seller._id, {
+        withdrawMethod,
+      });
+
+      res.status(201).json({
+        success: true,
+        seller,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// delete seller withdraw merthods --- only seller
+router.delete(
+  "/delete-withdraw-method/",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const seller = await Shop.findById(req.seller._id);
+
+      if (!seller) {
+        return next(new ErrorHandler("Seller not found with this id", 400));
+      }
+
+      seller.withdrawMethod = null;
+
+      await seller.save();
+
+      res.status(201).json({
+        success: true,
+        seller,
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));

@@ -209,9 +209,9 @@ const UserInbox = () => {
 
   return (
     <div className="w-full">
+      <Header/>
       {!open && (
         <>
-          <Header />
           <h1 className="text-center text-[30px] py-3 font-Poppins">
             All Messages
           </h1>
@@ -289,7 +289,7 @@ const MessageList = ({
 
   return (
     <div
-      className={`w-full flex p-3 px-3 ${
+      className={`w-full flex p-3 px-3 ml-2 ${
         active === index ? "bg-[#00000010]" : "bg-transparent"
       }  cursor-pointer`}
       onClick={(e) =>

@@ -3,8 +3,8 @@ import Event from '../model/event.model.js'
 import { upload } from '../multer.js'
 import catchAsyncErrors from '../middleware/catchAsyncErrors.js'
 import ErrorHandler from '../utils/ErrorHandler.js'
-import Shop from '../model/shop.js'
-import { isSeller } from '../middleware/auth.js'
+import Shop from '../model/shop.model.js'
+import { isAdmin, isAuthenticated, isSeller } from '../middleware/auth.js'
 import fs from 'fs'
 
 
@@ -94,6 +94,28 @@ router.get("/get-all-events", async (req, res, next) => {
     return next(new ErrorHandler(error, 400));
   }
 });
+
+
+// all events --- for admin
+router.get(
+  "/admin-all-events",
+  isAuthenticated,
+  isAdmin("Admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const events = await Event.find().sort({
+        createdAt: -1,
+      });
+      res.status(201).json({
+        success: true,
+        events,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
 
 
 export default router

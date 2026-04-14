@@ -1,10 +1,10 @@
 import { Router } from 'express'
-import Product from '../model/product.js'
+import Product from '../model/product.model.js'
 import { upload } from '../multer.js'
 import catchAsyncErrors from '../middleware/catchAsyncErrors.js'
 import ErrorHandler from '../utils/ErrorHandler.js'
-import Shop from '../model/shop.js'
-import { isAuthenticated, isSeller } from '../middleware/auth.js'
+import Shop from '../model/shop.model.js'
+import { isAdmin, isAuthenticated, isSeller } from '../middleware/auth.js'
 import fs from 'fs'
 import Order from '../model/order.model.js'
 import mongoose from 'mongoose'
@@ -183,5 +183,25 @@ router.put(
     }
   })
 );
+// all products --- for admin
+router.get(
+  "/admin-all-products",
+  isAuthenticated,
+  isAdmin("Admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const products = await Product.find().sort({
+        createdAt: -1,
+      });
+      res.status(201).json({
+        success: true,
+        products,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
 
 export default router

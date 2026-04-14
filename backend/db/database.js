@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import Shop from "../model/shop.js";
-import User from "../model/user.js";
+import Shop from "../model/shop.model.js";
+import User from "../model/user.model.js";
 
 const connectDatabase=()=>{
     mongoose.connect(process.env.DB_URL).then(async (data)=>{

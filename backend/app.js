@@ -23,15 +23,16 @@ if (process.env.NODE_ENV !== "PRODUCTION") {
 }
 
 // import routes
-import userRouter from './controller/user.js'
-import shopRouter from './controller/shop.js'
-import productRouter from './controller/product.js'
+import userRouter from './controller/user.controller.js'
+import shopRouter from './controller/shop.controller.js'
+import productRouter from './controller/product.controller.js'
 import eventRouter from './controller/event.controller.js'
 import couponCodeRouter from './controller/couponCode.controller.js'
 import paymentRouter from './controller/payment.controller.js'
 import orderRouter from './controller/order.controller.js'
 import conversationRouter from './controller/conversation.controller.js'
 import messageRouter from './controller/message.controller.js'
+import withdrawRouter from './controller/withdraw.controller.js'
 app.use('/api/v2/user', userRouter)
 app.use('/api/v2/shop', shopRouter)
 app.use('/api/v2/product', productRouter)
@@ -41,6 +42,7 @@ app.use('/api/v2/payment', paymentRouter)
 app.use('/api/v2/order', orderRouter)
 app.use('/api/v2/conversation', conversationRouter)
 app.use('/api/v2/message', messageRouter)
+app.use('/api/v2/withdraw', withdrawRouter)
 // it's for ErrorHandling...
 app.use(errorMiddleware)
 export default app

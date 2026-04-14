@@ -1,8 +1,15 @@
 import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
-import { LoginPage, SignupPage, ActivationPage, HomePage, EventsPage, ProductPage, BestSellingPage, FAQPage, ProductDetailsPage, ProfilePage, CheckoutPage, PaymentPage, OrderSuccessPage, ShopCreatePage, SellerActivationPage, ShopLoginPage ,OrderDetailsPage,TrackOrderPage,UserInbox} from './routes/Routes.js'
-import { ShopHomePage, ShopDashboardPage, ShopCreateProduct, ShopAllProduct, ShopCreateEvents, ShopAllEvent, ShopAllCoupons, ShopPreviewPage ,ShopAllOrders,ShopOrderDetails,ShopAllRefunds,ShopSettingsPage,ShopWithdrawMoneyPage,ShopInboxPage} from './routes/ShopRoutes.js'
-import {AdminDashboardPage} from './routes/AdminRoutes.js'
+import { LoginPage, SignupPage, ActivationPage, HomePage, EventsPage, ProductPage, BestSellingPage, FAQPage, ProductDetailsPage, ProfilePage, CheckoutPage, PaymentPage, OrderSuccessPage, ShopCreatePage, SellerActivationPage, ShopLoginPage, OrderDetailsPage, TrackOrderPage, UserInbox } from './routes/Routes.js'
+import { ShopHomePage, ShopDashboardPage, ShopCreateProduct, ShopAllProduct, ShopCreateEvents, ShopAllEvent, ShopAllCoupons, ShopPreviewPage, ShopAllOrders, ShopOrderDetails, ShopAllRefunds, ShopSettingsPage, ShopWithdrawMoneyPage, ShopInboxPage } from './routes/ShopRoutes.js'
+import {
+  AdminDashboardPage, AdminDashboardUsers,
+  AdminDashboardSellers,
+  AdminDashboardOrders,
+  AdminDashboardProducts,
+  AdminDashboardEvents,
+  AdminDashboardWithdraw
+} from './routes/AdminRoutes.js'
 import { ToastContainer, toast } from 'react-toastify';
 import { useEffect } from 'react';
 import Store from './redux/store';
@@ -13,15 +20,15 @@ import { getAllProducts } from "./redux/actions/product";
 import { getAllEvents } from "./redux/actions/event";
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
 import SellerProtectedRoute from './routes/SellerProtectedRoute.jsx';
-import {Elements} from '@stripe/react-stripe-js'
+import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';
 import { server } from './server.js';
 import ProtectedAdminRoute from './routes/ProtectedAdminRoute.jsx'
 const App = () => {
   const dispatch = useDispatch();
-const [stripeApiKey,setStripeApiKey]=useState('')
-async function getStripeApikey() {
+  const [stripeApiKey, setStripeApiKey] = useState('')
+  async function getStripeApikey() {
     const { data } = await axios.get(`${server}/payment/stripeapikey`);
     setStripeApiKey(data.stripeApikey);
   }
@@ -32,8 +39,8 @@ async function getStripeApikey() {
     dispatch(getAllEvents());
     getStripeApikey()
   }, [dispatch])
-  
-  
+
+
   return (
     <>
       <BrowserRouter>
@@ -107,7 +114,7 @@ async function getStripeApikey() {
               <ShopOrderDetails />
             </SellerProtectedRoute>
           } />
-          
+
           <Route path='/dashboard-create-product' element={
             <SellerProtectedRoute
             >
@@ -170,12 +177,59 @@ async function getStripeApikey() {
           } />
 
 
-          <Route path='/admin/dashboard' element={
+          <Route path='/admin-dashboard' element={
             <ProtectedAdminRoute>
-            <AdminDashboardPage />
+              <AdminDashboardPage />
             </ProtectedAdminRoute>
-        } />
-
+          } />
+          <Route
+            path="/admin-users"
+            element={
+              <ProtectedAdminRoute>
+                <AdminDashboardUsers />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin-sellers"
+            element={
+              <ProtectedAdminRoute>
+                <AdminDashboardSellers />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin-orders"
+            element={
+              <ProtectedAdminRoute>
+                <AdminDashboardOrders />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin-products"
+            element={
+              <ProtectedAdminRoute>
+                <AdminDashboardProducts />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin-events"
+            element={
+              <ProtectedAdminRoute>
+                <AdminDashboardEvents />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin-withdraw-request"
+            element={
+              <ProtectedAdminRoute>
+                <AdminDashboardWithdraw />
+              </ProtectedAdminRoute>
+            }
+          />
         </Routes>
         <ToastContainer
           position="bottom-center"

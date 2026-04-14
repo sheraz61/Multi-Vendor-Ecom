@@ -1,4 +1,3 @@
-import Conversation from "../model/conversation.model.js";
 
 import ErrorHandler from "../utils/ErrorHandler.js";
 

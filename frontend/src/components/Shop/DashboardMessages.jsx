@@ -101,7 +101,7 @@ const DashboardMessages = () => {
       e.preventDefault();
 
     const message = {
-      sender: user._id,
+      sender: seller._id,
       text: newMessage,
       conversationId: currentChat._id,
     };
@@ -110,7 +110,7 @@ const DashboardMessages = () => {
     );
 
     socketId.emit("sendMessage", {
-      senderId: user?._id,
+      senderId: seller?._id,
       receiverId,
       text: newMessage,
     });

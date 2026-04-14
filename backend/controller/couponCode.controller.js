@@ -1,7 +1,6 @@
 import { Router } from 'express'
 import catchAsyncErrors from '../middleware/catchAsyncErrors.js'
 import ErrorHandler from '../utils/ErrorHandler.js'
-import Shop from '../model/shop.js'
 import { isSeller } from '../middleware/auth.js'
 import CouponCode from '../model/couponCode.model.js'
 
