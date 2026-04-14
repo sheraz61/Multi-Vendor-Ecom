@@ -6,7 +6,7 @@ import {
   AiOutlineShoppingCart,
 } from "react-icons/ai";
 import { RxCross1 } from "react-icons/rx";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "../../../styles/style";
 import { useDispatch, useSelector } from "react-redux";
 import { addTocart } from "../../../redux/actions/cart";
@@ -15,12 +15,16 @@ import {
   addToWishlist,
   removeFromWishlist,
 } from "../../../redux/actions/wishlist";
+import axios from "axios";
+import { server } from "../../../server";
 const ProductDetailsCard = ({ setOpen, data }) => {
   const dispatch = useDispatch();
   const { cart } = useSelector((state) => state.cart);
+  const { user, isAuthenticated } = useSelector((state) => state.user);
   const { wishlist } = useSelector((state) => state.wishlist);
   const [count, setCount] = useState(1);
   const [click, setClick] = useState(false);
+  const navigate= useNavigate()
   useEffect(() => {
     if (wishlist && wishlist.find((i) => i._id === data._id)) {
       setClick(true);
@@ -29,8 +33,19 @@ const ProductDetailsCard = ({ setOpen, data }) => {
     }
   }, [wishlist]);
 
-  const handleMessageSubmit = () => {
-
+  const handleMessageSubmit = async () => {
+    if (isAuthenticated) {
+      const groupTitle = data._id + user._id;
+      const userId = user._id
+      const sellerId = data.shop._id
+      await axios.post(`${server}/conversation/create-new-conversation`, { groupTitle, userId, sellerId }).then((res)=>{
+        navigate(`/conversation/${res.data.conversation._id}`)
+      }).catch((error)=>{
+        toast.error(error.response.data.message)
+      })
+    }else{
+      toast.error('please login to start chat')
+    }
   }
   const removeFromWishlistHandler = (data) => {
     setClick(!click);
