@@ -30,6 +30,8 @@ import eventRouter from './controller/event.controller.js'
 import couponCodeRouter from './controller/couponCode.controller.js'
 import paymentRouter from './controller/payment.controller.js'
 import orderRouter from './controller/order.controller.js'
+import conversationRouter from './controller/conversation.controller.js'
+import messageRouter from './controller/message.controller.js'
 app.use('/api/v2/user', userRouter)
 app.use('/api/v2/shop', shopRouter)
 app.use('/api/v2/product', productRouter)
@@ -37,6 +39,8 @@ app.use('/api/v2/event', eventRouter)
 app.use('/api/v2/coupon', couponCodeRouter)
 app.use('/api/v2/payment', paymentRouter)
 app.use('/api/v2/order', orderRouter)
+app.use('/api/v2/conversation', conversationRouter)
+app.use('/api/v2/message', messageRouter)
 // it's for ErrorHandling...
 app.use(errorMiddleware)
 export default app
