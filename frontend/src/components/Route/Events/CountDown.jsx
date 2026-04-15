@@ -1,39 +1,67 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { server } from "../../../server";
+import { getAllEvents } from "../../../redux/actions/event";
+
+function initialTimeLeft(finishDate) {
+  if (!finishDate) return {};
+  const difference = +new Date(finishDate) - +new Date();
+  if (difference <= 0) return {};
+  return {
+    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((difference / 1000 / 60) % 60),
+    seconds: Math.floor((difference / 1000) % 60),
+  };
+}
 
 const CountDown = ({ data }) => {
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  const dispatch = useDispatch();
+  const deleteRequestedRef = useRef(false);
+  const [timeLeft, setTimeLeft] = useState(() =>
+    initialTimeLeft(data?.Finish_Date)
+  );
 
- useEffect(() => {
-  const timer = setTimeout(() => {
-    setTimeLeft(calculateTimeLeft());
-  }, 1000);
+  useEffect(() => {
+    deleteRequestedRef.current = false;
+  }, [data?._id]);
 
-  return () => clearTimeout(timer);
-}, [data, timeLeft]);
-if (Object.keys(timeLeft).length === 0 && data?._id) {
-  axios.delete(`${server}/event/delete-shop-event/${data._id}`);
-}
+  useEffect(() => {
+    if (!data?._id || !data?.Finish_Date) return;
 
- function calculateTimeLeft() {
-  if (!data?.Finish_Date) return {};
-
-  const difference = +new Date(data.Finish_Date) - +new Date();
-
-  let timeLeft = {};
-
-  if (difference > 0) {
-    timeLeft = {
-      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-      minutes: Math.floor((difference / 1000 / 60) % 60),
-      seconds: Math.floor((difference / 1000) % 60),
+    const tick = () => {
+      const difference = +new Date(data.Finish_Date) - +new Date();
+      if (difference <= 0) {
+        setTimeLeft({});
+        if (!deleteRequestedRef.current) {
+          deleteRequestedRef.current = true;
+          axios
+            .delete(`${server}/event/delete-shop-event/${data._id}`)
+            .then(() => {
+              dispatch(getAllEvents());
+            })
+            .catch((err) => {
+              deleteRequestedRef.current = false;
+              if (err?.response?.status === 404) {
+                dispatch(getAllEvents());
+              }
+            });
+        }
+        return;
+      }
+      setTimeLeft({
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+      });
     };
-  }
 
-  return timeLeft;
-}
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [data?._id, data?.Finish_Date, dispatch]);
 
   const timerComponents = Object.keys(timeLeft).map((interval) => {
     if (!timeLeft[interval]) {

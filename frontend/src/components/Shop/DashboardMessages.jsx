@@ -46,7 +46,7 @@ const DashboardMessages = () => {
     getConversation();
   }, [seller, messages]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (seller) {
       const sellerId = seller?._id;
       socketId.emit("addUser", sellerId);
@@ -56,7 +56,7 @@ const DashboardMessages = () => {
     }
   }, [seller]);
 
-   const onlineCheck = (chat) => {
+  const onlineCheck = (chat) => {
     const chatMembers = chat.members.find((member) => member !== seller?._id);
     const online = onlineUsers.find((user) => user.userId === chatMembers);
 
@@ -98,7 +98,7 @@ const DashboardMessages = () => {
 
   // create new message
   const sendMessageHandler = async (e) => {
-      e.preventDefault();
+    e.preventDefault();
 
     const message = {
       sender: seller._id,
@@ -152,16 +152,51 @@ const DashboardMessages = () => {
       });
   };
 
-  const handleImageUpload=()=>{
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0]
+    setImages(file)
+    imageSendingHandler(file)
 
   }
 
-  const imageSendingHandler =()=>{
+  const imageSendingHandler = async (e) => {
+    const fromData = new FormData()
+    fromData.append('images', e)
+    fromData.append('sender', seller._id)
+    fromData.append('text', newMessage)
+    fromData.append('conversationId', currentChat._id)
 
+    const receiverId = currentChat.members.find(
+      (member) => member !== seller._id
+    );
+
+    socketId.emit("sendMessage", {
+      senderId: seller._id,
+      receiverId,
+      images: e,
+    });
+
+    try {
+      await axios
+        .post(`${server}/message/create-new-message`, fromData)
+        .then((res) => {
+          setImages();
+          setMessages([...messages, res.data.message]);
+          updateLastMessageForImage();
+        });
+    } catch (error) {
+      console.log(error);
+    }
   }
-const updateLastMessageForImag =()=>{
-
-}
+  const updateLastMessageForImage = async () => {
+    await axios.put(
+      `${server}/conversation/update-last-message/${currentChat._id}`,
+      {
+        lastMessage: "Photo",
+        lastMessageId: seller._id,
+      }
+    );
+  }
 
   return (
     <div className="w-[90%] bg-white m-5 h-[85vh] overflow-y-scroll rounded">
@@ -242,9 +277,10 @@ const MessageList = ({
     getUser();
   }, [me, data]);
   return (
-    <div
-      className={`w-full flex p-3 px-3 ${active === index ? "bg-[#00000010]" : "bg-transparent"
-        }  cursor-pointer`}
+     <div
+      className={`w-full flex p-3 px-3 ${
+        active === index ? "bg-[#00000010]" : "bg-transparent"
+      }  cursor-pointer`}
       onClick={(e) =>
         setActive(index) ||
         handleClick(data._id) ||
@@ -270,7 +306,7 @@ const MessageList = ({
         <p className="text-[16px] text-[#000c]">
           {!loadingSeller && data?.lastMessageId !== user?._id
             ? "You:"
-            : user?.name?.split(" ")[0] + ": "}{" "}
+            : user?.name.split(" ")[0] + ": "}{" "}
           {data?.lastMessage}
         </p>
       </div>
@@ -291,7 +327,7 @@ const SellerInbox = ({
   handleImageUpload,
 }) => {
   return (
-    <div className="w-full min-h-full flex flex-col justify-between">
+     <div className="w-full min-h-full flex flex-col justify-between">
       {/* message header */}
       <div className="w-full flex p-3 items-center justify-between bg-slate-200">
         <div className="flex">
@@ -318,9 +354,9 @@ const SellerInbox = ({
           messages.map((item, index) => {
             return (
               <div
-                key={index}
-                className={`flex w-full my-2 ${item.sender === sellerId ? "justify-end" : "justify-start"
-                  }`}
+                className={`flex w-full my-2 ${
+                  item.sender === sellerId ? "justify-end" : "justify-start"
+                }`}
                 ref={scrollRef}
               >
                 {item.sender !== sellerId && (
@@ -339,8 +375,9 @@ const SellerInbox = ({
                 {item.text !== "" && (
                   <div>
                     <div
-                      className={`w-max p-2 rounded ${item.sender === sellerId ? "bg-[#000]" : "bg-[#38c776]"
-                        } text-[#fff] h-min`}
+                      className={`w-max p-2 rounded ${
+                        item.sender === sellerId ? "bg-[#000]" : "bg-[#38c776]"
+                      } text-[#fff] h-min`}
                     >
                       <p>{item.text}</p>
                     </div>

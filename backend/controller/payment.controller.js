@@ -23,7 +23,7 @@ router.post('/process',catchAsyncErrors(async (req,res,next)=>{
     const stripe = getStripe()
     const myPayment = await stripe.paymentIntents.create({
       amount: req.body.amount,
-      currency: "inr",
+      currency: "USD",
       metadata: {
         company: "e-comShop",
       },

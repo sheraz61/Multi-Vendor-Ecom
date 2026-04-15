@@ -25,7 +25,7 @@ const ShopInfo = ({ isOwner }) => {
       console.log(error);
       setIsLoading(false);
     })
-  }, [])
+  }, [dispatch, id]);
 
 
   const logoutHandler = async () => {
@@ -45,7 +45,10 @@ const ShopInfo = ({ isOwner }) => {
 
     const totalRatings = products && products.reduce((acc,product) => acc + product.reviews.reduce((sum,review) => sum + review.rating, 0),0);
 
-    const averageRating = totalRatings / totalReviewsLength || 0;
+    const averageRating =
+      totalReviewsLength > 0 ? totalRatings / totalReviewsLength : 0;
+    const ratingDisplay =
+      totalReviewsLength > 0 ? averageRating.toFixed(1) : "—";
 
   return (
     <>
@@ -54,36 +57,36 @@ const ShopInfo = ({ isOwner }) => {
       <Loader />
     ) : (
       <div>
-      <div className="w-full py-5">
-        <div className="w-full flex item-center justify-center">
+      <div className="w-full min-w-0 py-5">
+        <div className="flex w-full items-center justify-center">
           <img
             src={`${data.avatar?.url}`}
             alt=""
-            className="w-[150px] h-[150px] object-cover rounded-full"
+            className="h-[150px] w-[150px] rounded-full object-cover"
           />
         </div>
-        <h3 className="text-center py-2 text-[20px]">{data.name}</h3>
-        <p className="text-[16px] text-[#000000a6] p-[10px] flex items-center">
+        <h3 className="px-2 py-2 text-center text-[20px]">{data.name}</h3>
+        <p className="break-words px-[10px] text-[16px] text-[#000000a6]">
           {data.description}
         </p>
       </div>
-      <div className="p-3">
+      <div className="min-w-0 p-3">
         <h5 className="font-[600]">Address</h5>
-        <h4 className="text-[#000000a6]">{data.address}</h4>
+        <h4 className="break-words text-[#000000a6]">{data.address}</h4>
       </div>
-      <div className="p-3">
+      <div className="min-w-0 p-3">
         <h5 className="font-[600]">Phone Number</h5>
-        <h4 className="text-[#000000a6]">{data.phoneNumber}</h4>
+        <h4 className="break-all text-[#000000a6]">{data.phoneNumber}</h4>
       </div>
-      <div className="p-3">
+      <div className="min-w-0 p-3">
         <h5 className="font-[600]">Total Products</h5>
         <h4 className="text-[#000000a6]">{products && products.length}</h4>
       </div>
-      <div className="p-3">
+      <div className="min-w-0 p-3">
         <h5 className="font-[600]">Shop Ratings</h5>
-        <h4 className="text-[#000000b0]">{averageRating}/5</h4>
+        <h4 className="text-[#000000b0]">{ratingDisplay}/5</h4>
       </div>
-      <div className="p-3">
+      <div className="min-w-0 p-3">
         <h5 className="font-[600]">Joined On</h5>
         <h4 className="text-[#000000b0]">{data?.createdAt?.slice(0, 10)}</h4>
       </div>

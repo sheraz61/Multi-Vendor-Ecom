@@ -7,8 +7,7 @@ import styles from "../../styles/style";
 import ProductCard from "../Route/ProductCard/ProductCard";
 import Ratings from "../Products/Ratings";
 import { getAllEventsShop } from "../../redux/actions/event";
-import { productData } from "../../static/data";
-
+import { format } from "timeago.js";
 const ShopProfileData = ({ isOwner }) => {
   const { products } = useSelector((state) => state.products);
   const { events } = useSelector((state) => state.events);
@@ -18,7 +17,7 @@ const ShopProfileData = ({ isOwner }) => {
   useEffect(() => {
     dispatch(getAllProductsShop(id));
     dispatch(getAllEventsShop(id));
-  }, [dispatch]);
+  }, [dispatch, id]);
 
   const [active, setActive] = useState(1);
 
@@ -26,53 +25,54 @@ const ShopProfileData = ({ isOwner }) => {
     products && products.map((product) => product.reviews).flat();
 
   return (
-      
-    <div className="w-full">
-      <div className="flex w-full items-center justify-between">
-        <div className="w-full flex">
-          <div className="flex items-center" onClick={() => setActive(1)}>
-            <h5
-              className={`font-[600] text-[20px] ${
-                active === 1 ? "text-red-500" : "text-[#333]"
-              } cursor-pointer pr-[20px]`}
-            >
-              Shop Products
-            </h5>
+    <div className="w-full min-w-0">
+      <div className="flex w-full min-w-0 flex-col gap-4 800px:flex-row 800px:items-center 800px:justify-between 800px:gap-3">
+        <nav
+          className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-3 border-b border-[#e8e8e8] pb-3 800px:border-0 800px:pb-0"
+          aria-label="Shop sections"
+        >
+          <button
+            type="button"
+            className={`cursor-pointer border-0 bg-transparent p-0 text-left font-[600] text-[15px] min-[400px]:text-[17px] 800px:text-[20px] ${
+              active === 1 ? "text-red-500" : "text-[#333]"
+            }`}
+            onClick={() => setActive(1)}
+          >
+            Shop Products
+          </button>
+          <button
+            type="button"
+            className={`cursor-pointer border-0 bg-transparent p-0 text-left font-[600] text-[15px] min-[400px]:text-[17px] 800px:text-[20px] ${
+              active === 2 ? "text-red-500" : "text-[#333]"
+            }`}
+            onClick={() => setActive(2)}
+          >
+            Running Events
+          </button>
+          <button
+            type="button"
+            className={`cursor-pointer border-0 bg-transparent p-0 text-left font-[600] text-[15px] min-[400px]:text-[17px] 800px:text-[20px] ${
+              active === 3 ? "text-red-500" : "text-[#333]"
+            }`}
+            onClick={() => setActive(3)}
+          >
+            Shop Reviews
+          </button>
+        </nav>
+        {isOwner && (
+          <div className="w-full shrink-0 800px:w-auto">
+            <Link to="/dashboard" className="block w-full 800px:w-auto">
+              <div
+                className={`${styles.button} !h-[42px] !w-full !rounded-[4px] 800px:!w-[150px]`}
+              >
+                <span className="text-[#fff]">Go Dashboard</span>
+              </div>
+            </Link>
           </div>
-          <div className="flex items-center" onClick={() => setActive(2)}>
-            <h5
-              className={`font-[600] text-[20px] ${
-                active === 2 ? "text-red-500" : "text-[#333]"
-              } cursor-pointer pr-[20px]`}
-            >
-              Running Events
-            </h5>
-          </div>
-
-          <div className="flex items-center" onClick={() => setActive(3)}>
-            <h5
-              className={`font-[600] text-[20px] ${
-                active === 3 ? "text-red-500" : "text-[#333]"
-              } cursor-pointer pr-[20px]`}
-            >
-              Shop Reviews
-            </h5>
-          </div>
-        </div>
-        <div>
-          {isOwner && (
-            <div>
-              <Link to="/dashboard">
-                <div className={`${styles.button} !rounded-[4px] h-[42px]`}>
-                  <span className="text-[#fff]">Go Dashboard</span>
-                </div>
-              </Link>
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
-      <br />
+      <div className="mt-6" />
       {active === 1 && (
         <div className="grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3 lg:gap-[25px] xl:grid-cols-4 xl:gap-[20px] mb-12 border-0">
           {products &&
@@ -103,23 +103,23 @@ const ShopProfileData = ({ isOwner }) => {
         </div>
       )}
 
-       {active === 3 && (
+      {active === 3 && (
         <div className="w-full">
           {allReviews &&
             allReviews.map((item, index) => (
-              <div className="w-full flex my-4">
+              <div key={index} className="my-4 flex w-full min-w-0">
                 <img
                   src={`${item.user.avatar?.url}`}
-                  className="w-[50px] h-[50px] rounded-full"
+                  className="h-[50px] w-[50px] shrink-0 rounded-full"
                   alt=""
                 />
-                <div className="pl-2">
-                  <div className="flex w-full items-center">
-                    <h1 className="font-[600] pr-2">{item.user.name}</h1>
+                <div className="min-w-0 pl-2">
+                  <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
+                    <h1 className="font-[600]">{item.user.name}</h1>
                     <Ratings rating={item.rating} />
                   </div>
                   <p className="font-[400] text-[#000000a7]">{item?.comment}</p>
-                  <p className="text-[#000000a7] text-[14px]">{item.createdAt.slice(0,10)}</p>
+                  <p className="text-[#000000a7] text-[14px]">{format(item?.createdAt)}</p>
                 </div>
               </div>
             ))}
@@ -127,10 +127,13 @@ const ShopProfileData = ({ isOwner }) => {
             <h5 className="w-full text-center py-5 text-[18px]">
               No Reviews have for this shop!
             </h5>
-          )} 
-         </div>
-        )} </div>
-  )};
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+};
 
   
 
