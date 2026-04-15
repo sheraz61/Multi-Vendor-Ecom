@@ -32,7 +32,6 @@ const UserOrderDetails = () => {
       .put(
         `${server}/product/create-new-review`,
         {
-          user,
           rating,
           comment,
           productId: selectedItem?._id,

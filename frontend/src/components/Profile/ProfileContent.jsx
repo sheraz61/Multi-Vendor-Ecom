@@ -74,7 +74,7 @@ function ProfileContent({ active }) {
             <div className="flex justify-center w-full">
               <div className="relative">
                 <img
-                  src={`${backend_Url}${user?.avatar}`}
+                  src={user?.avatar.url}
                   className="w-[150px] h-[150px] rounded-full object-cover border-[3px] border-[#3ad132]"
                   alt=""
                 />

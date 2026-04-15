@@ -4,8 +4,9 @@ import ErrorHandler from "../utils/ErrorHandler.js";
 import catchAsyncErrors from "../middleware/catchAsyncErrors.js";
 import express from 'express'
 import { Router } from "express";
-import { upload } from "../multer.js";
+import  upload from "../middleware/multer.js";
 import Messages from "../model/messages.model.js";
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 const router = Router()
 
@@ -17,11 +18,8 @@ router.post('/create-new-message', upload.single('images'), catchAsyncErrors(asy
 
     const messageData = req.body;
     if (req.file) {
-      const files = req.files;
-      const imageUrl = files.map((file) => `${file.filename}`)
-
-      messageData.images = imageUrl
-
+      const image = await uploadToCloudinary(req.file.path, "messages");
+      messageData.images = image;
     }
 
     messageData.conversationId = req.body.conversationId
@@ -32,7 +30,7 @@ router.post('/create-new-message', upload.single('images'), catchAsyncErrors(asy
       conversationId: messageData.conversationId,
       sender: messageData.sender,
       text: messageData.text,
-      images: messageData.images ? messageData.images : undefined,
+      images: messageData.images || undefined,
 
 
     })

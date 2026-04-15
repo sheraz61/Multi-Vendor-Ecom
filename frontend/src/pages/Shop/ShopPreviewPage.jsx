@@ -6,14 +6,14 @@ import ShopProfileData from "../../components/Shop/ShopProfileData";
 const ShopPreviewPage = () => {
   return (
     <div className={`${styles.section} bg-[#f5f5f5]`}>
-         <div className="w-full 800px:flex py-10 justify-between">
-          <div className="800px:w-[25%] bg-[#fff] rounded-[4px] shadow-sm 800px:overflow-y-scroll 800px:h-[90vh] 800px:sticky top-10 left-0 z-10">
-            <ShopInfo isOwner={false} />
-          </div>
-          <div className="800px:w-[72%] mt-5 800px:mt-['unset'] rounded-[4px]">
-            <ShopProfileData isOwner={false} />
-          </div>
-         </div>
+      <div className="flex w-full flex-col gap-6 py-6 sm:py-8 800px:flex-row 800px:items-start 800px:justify-between 800px:gap-8 800px:py-10">
+        <aside className="w-full shrink-0 overflow-hidden rounded-[4px] bg-white shadow-sm 800px:sticky 800px:top-10 800px:z-10 800px:w-[25%] 800px:max-h-[min(90vh,100vh-5rem)] 800px:overflow-y-auto">
+          <ShopInfo isOwner={false} />
+        </aside>
+        <section className="w-full min-w-0 flex-1 rounded-[4px] bg-white p-3 shadow-sm sm:p-5 800px:mt-0 800px:w-[72%] 800px:bg-transparent 800px:p-0 800px:shadow-none">
+          <ShopProfileData isOwner={false} />
+        </section>
+      </div>
     </div>
   )
 }

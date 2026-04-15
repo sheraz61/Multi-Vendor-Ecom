@@ -3,12 +3,19 @@ import { config } from "dotenv";
 import cookieParser from 'cookie-parser';
 const app = express()
 import cors from 'cors'
+import bodyParser from 'body-parser';
 import errorMiddleware from "./middleware/error.js";
+
+
+
+app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.json());
 app.use(cookieParser())
-app.use('/',express.static("uploads"))
 
-app.use(express.urlencoded({ extended: true }));
+app.use("/test", (req, res) => {
+  res.send("Hello world!");
+});
+
 app.use(cors(
     { 
         origin: "http://localhost:5173",

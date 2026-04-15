@@ -1,11 +1,11 @@
 import { Router } from 'express'
 import Event from '../model/event.model.js'
-import { upload } from '../multer.js'
+import upload from '../middleware/multer.js'
 import catchAsyncErrors from '../middleware/catchAsyncErrors.js'
 import ErrorHandler from '../utils/ErrorHandler.js'
 import Shop from '../model/shop.model.js'
 import { isAdmin, isAuthenticated, isSeller } from '../middleware/auth.js'
-import fs from 'fs'
+import { deleteFromCloudinary, uploadToCloudinary } from '../utils/cloudinary.js'
 
 
 const router = Router()
@@ -17,7 +17,9 @@ router.post('/create-event', upload.array('images'), catchAsyncErrors(async (req
             return next(new ErrorHandler('Shop did not exist', 404))
         } else {
             const files = req.files;
-            const imageUrls = files.map((file) => `${file.filename}`)
+            const imageUrls = await Promise.all(
+                files.map((file) => uploadToCloudinary(file.path, "events"))
+            );
             const eventData = req.body;
             eventData.images = imageUrls
             eventData.shop = shop
@@ -65,17 +67,11 @@ router.delete(
             //       event.images[i].public_id
             //     );
             //   }
-            event.images.forEach((imgUrl) => {
-                const filename = imgUrl
-                const filePath = `uploads/${filename}`
-
-                fs.unlink(filePath, (err) => {
-                    if (err) {
-                        console.log(err);
-
-                    }
-                })
-            })
+            await Promise.all(
+                (event.images || []).map((image) =>
+                    deleteFromCloudinary(typeof image === "string" ? image : image?.public_id)
+                )
+            );
             await Event.findByIdAndDelete(req.params.id)
 
 

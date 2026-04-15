@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 import app from "./app.js";
 import connectDatabase from "./db/database.js";
-
+import connectCloudinary from "./config/cloudinary.js";
 // handling uncaught exception
 process.on("uncaughtException",(err)=>{
     console.log(`Error : ${err.message}`);
@@ -23,6 +23,7 @@ config({
 
 connectDatabase()
 
+connectCloudinary()
 
 // create server
 const server=app.listen(process.env.PORT,()=>{

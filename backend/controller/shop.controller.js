@@ -1,15 +1,16 @@
 import express from 'express'
-import path from 'path'
 import { Router } from 'express'
-import { upload } from '../multer.js'
+import upload from '../middleware/multer.js'
 import Shop from '../model/shop.model.js'
 import ErrorHandler from '../utils/ErrorHandler.js'
 import jwt from 'jsonwebtoken'
 import sendMail from '../utils/sendMail.js'
-import fs from "fs";
 import catchAsyncErrors from '../middleware/catchAsyncErrors.js'
 import sendShopToken from '../utils/shopToken.js'
 import { isAdmin, isAuthenticated, isSeller } from '../middleware/auth.js'
+import { deleteFromCloudinary, uploadToCloudinary } from '../utils/cloudinary.js'
+import Product from '../model/product.model.js'
+import Event from '../model/event.model.js'
 const router = Router()
 
 // create shop
@@ -17,25 +18,17 @@ router.post("/create-shop", upload.single('file'), catchAsyncErrors(async (req, 
     try {
         const { email } = req.body;
         const sellerEmail = await Shop.findOne({ email });
+        if (!req.file) {
+            return next(new ErrorHandler("Please upload avatar file", 400));
+        }
         if (sellerEmail) {
-            const filename = req.file.filename
-            const filePath = `uploads/${filename}`
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    console.log(err);
-                    res.status(500).json({
-                        message: 'Error deleting file',
-                    })
-                }
-            })
             return next(new ErrorHandler("User already exists", 400));
         }
 
-        const filename = req.file.filename;
-        // const fileUrl=path.join(filename)
+        const uploadedAvatar = await uploadToCloudinary(req.file.path, "shops");
         const fileUrl = {
-            public_id: filename,           // previously just the filename
-            url: `/uploads/${filename}`
+            public_id: uploadedAvatar.public_id,
+            url: uploadedAvatar.url
         }
         const seller = {
             name: req.body.name,
@@ -227,24 +220,30 @@ router.put(
                 return next(new ErrorHandler("Please upload avatar file", 400));
             }
             const existUser = await Shop.findById(req.seller.id)
-            
-            
-            // avatar.url is a web path like "/uploads/file.png" — not a disk path (on Windows unlink would use C:\uploads\...)
-            const oldUrl = existUser?.avatar?.url
-            if (oldUrl && (oldUrl.startsWith('/uploads/') || oldUrl.startsWith('uploads/'))) {
-                const oldDiskPath = path.join(process.cwd(), 'uploads', path.basename(oldUrl))
-                if (fs.existsSync(oldDiskPath)) {
-                    fs.unlinkSync(oldDiskPath)
-                }
-            }
-            
-            
-            const filename = req.file.filename
+
+            await deleteFromCloudinary(existUser?.avatar?.public_id);
+            const uploadedAvatar = await uploadToCloudinary(req.file.path, "shops");
             const fileUrl = {
-                public_id: filename,           // previously just the filename
-                url: `/uploads/${filename}`
+                public_id: uploadedAvatar.public_id,
+                url: uploadedAvatar.url
             }
-            const seller = await Shop.findByIdAndUpdate(req.seller.id, { avatar: fileUrl })
+            const seller = await Shop.findByIdAndUpdate(req.seller.id, { avatar: fileUrl }, { new: true })
+            await Product.updateMany(
+                { shopId: req.seller.id },
+                {
+                    $set: {
+                        shop: seller, 
+                    },
+                }
+            );
+            await Event.updateMany(
+                { shopId: req.seller.id },
+                {
+                    $set: {
+                        shop: seller, 
+                    },
+                }
+            );
             res.status(201).json({
                 success: true,
                 seller,
@@ -276,7 +275,22 @@ router.put(
             shop.zipCode = zipCode;
 
             await shop.save();
-
+            await Product.updateMany(
+                { shopId: req.seller.id },
+                {
+                    $set: {
+                        shop: shop, // 🔥 overwrite full shop object
+                    },
+                }
+            );
+             await Event.updateMany(
+                { shopId: req.seller.id },
+                {
+                    $set: {
+                        shop: shop, // 🔥 overwrite full shop object
+                    },
+                }
+            );
             res.status(201).json({
                 success: true,
                 shop,
@@ -289,97 +303,97 @@ router.put(
 
 // all sellers --- for admin
 router.get(
-  "/admin-all-sellers",
-  isAuthenticated,
-  isAdmin("Admin"),
-  catchAsyncErrors(async (req, res, next) => {
-    try {
-      const sellers = await Shop.find().sort({
-        createdAt: -1,
-      });
-      res.status(201).json({
-        success: true,
-        sellers,
-      });
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
-    }
-  })
+    "/admin-all-sellers",
+    isAuthenticated,
+    isAdmin("Admin"),
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            const sellers = await Shop.find().sort({
+                createdAt: -1,
+            });
+            res.status(201).json({
+                success: true,
+                sellers,
+            });
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
+        }
+    })
 );
 
 // delete seller ---admin
 router.delete(
-  "/delete-seller/:id",
-  isAuthenticated,
-  isAdmin("Admin"),
-  catchAsyncErrors(async (req, res, next) => {
-    try {
-      const seller = await Shop.findById(req.params.id);
+    "/delete-seller/:id",
+    isAuthenticated,
+    isAdmin("Admin"),
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            const seller = await Shop.findById(req.params.id);
 
-      if (!seller) {
-        return next(
-          new ErrorHandler("Seller is not available with this id", 400)
-        );
-      }
+            if (!seller) {
+                return next(
+                    new ErrorHandler("Seller is not available with this id", 400)
+                );
+            }
 
-      await Shop.findByIdAndDelete(req.params.id);
+            await Shop.findByIdAndDelete(req.params.id);
 
-      res.status(201).json({
-        success: true,
-        message: "Seller deleted successfully!",
-      });
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
-    }
-  })
+            res.status(201).json({
+                success: true,
+                message: "Seller deleted successfully!",
+            });
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
+        }
+    })
 );
 
 // update seller withdraw methods --- sellers
 router.put(
-  "/update-payment-methods",
-  isSeller,
-  catchAsyncErrors(async (req, res, next) => {
-    try {
-      const { withdrawMethod } = req.body;
+    "/update-payment-methods",
+    isSeller,
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            const { withdrawMethod } = req.body;
 
-      const seller = await Shop.findByIdAndUpdate(req.seller._id, {
-        withdrawMethod,
-      });
+            const seller = await Shop.findByIdAndUpdate(req.seller._id, {
+                withdrawMethod,
+            });
 
-      res.status(201).json({
-        success: true,
-        seller,
-      });
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
-    }
-  })
+            res.status(201).json({
+                success: true,
+                seller,
+            });
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
+        }
+    })
 );
 
 // delete seller withdraw merthods --- only seller
 router.delete(
-  "/delete-withdraw-method/",
-  isSeller,
-  catchAsyncErrors(async (req, res, next) => {
-    try {
-      const seller = await Shop.findById(req.seller._id);
+    "/delete-withdraw-method/",
+    isSeller,
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            const seller = await Shop.findById(req.seller._id);
 
-      if (!seller) {
-        return next(new ErrorHandler("Seller not found with this id", 400));
-      }
+            if (!seller) {
+                return next(new ErrorHandler("Seller not found with this id", 400));
+            }
 
-      seller.withdrawMethod = null;
+            seller.withdrawMethod = null;
 
-      await seller.save();
+            await seller.save();
 
-      res.status(201).json({
-        success: true,
-        seller,
-      });
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
-    }
-  })
+            res.status(201).json({
+                success: true,
+                seller,
+            });
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
+        }
+    })
 );
 
 
