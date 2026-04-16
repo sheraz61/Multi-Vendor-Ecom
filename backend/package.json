@@ -1,11 +1,11 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "backend/server.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node backend/server.js"
+    "start": "node server.js"
   },
   "author": "Sheraz Hussain",
   "license": "ISC",
