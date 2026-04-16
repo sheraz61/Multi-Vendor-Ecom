@@ -8,7 +8,7 @@ const server = http.createServer(app)
 // ✅ create socket server
 const io = new Server(server, {
     cors: {
-        origin: "*", // or your frontend URL
+        origin: "https://multi-vendor-ecom-seven.vercel.app", // or your frontend URL
         methods: ["GET", "POST"],
     },
 });
