@@ -19,8 +19,8 @@ function ProfileSidebar({ setActive, active }) {
     const dispatch = useDispatch()
     const navigate = useNavigate();
     const { user } = useSelector((state) => state.user)
-    const logoutHandler = () => {
-        axios
+    const logoutHandler = async () =>  {
+       await axios
             .get(`${server}/user/logout`, { withCredentials: true })
         dispatch(loadUser())
         window.location.reload(true);
