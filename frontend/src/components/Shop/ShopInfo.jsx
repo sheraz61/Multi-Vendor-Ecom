@@ -47,67 +47,83 @@ const ShopInfo = ({ isOwner }) => {
     const averageRating =
       totalReviewsLength > 0 ? totalRatings / totalReviewsLength : 0;
     const ratingDisplay =
-      totalReviewsLength > 0 ? averageRating.toFixed(1) : "0.0";
+      totalReviewsLength > 0 ? averageRating.toFixed(2) : "0";
 
   return (
-    <>
-   {
-    isLoading  ? (
+  <>
+    {isLoading ? (
       <Loader />
     ) : (
-      <div>
-      <div className="w-full min-w-0 py-5">
-        <div className="flex w-full items-center justify-center">
+      <div className="w-full flex flex-col gap-1">
+
+        {/* Avatar + Name + Description */}
+        <div className="flex flex-col items-center text-center px-5 pt-6 pb-4 border-b border-gray-100">
           <img
             src={`${data.avatar?.url}`}
             alt=""
-            className="h-[150px] w-[150px] rounded-full object-cover"
+            className="w-[100px] h-[100px] rounded-full object-cover ring-4 ring-teal-50 shadow-sm"
           />
+          <h3 className="mt-3 text-lg font-semibold text-gray-900">{data.name}</h3>
+          <p className="mt-1 text-sm text-gray-500 leading-relaxed break-words">
+            {data.description}
+          </p>
         </div>
-        <h3 className="px-2 py-2 text-center text-[20px]">{data.name}</h3>
-        <p className="break-words px-[10px] text-[16px] text-[#000000a6]">
-          {data.description}
-        </p>
-      </div>
-      <div className="min-w-0 p-3">
-        <h5 className="font-[600]">Address</h5>
-        <h4 className="break-words text-[#000000a6]">{data.address}</h4>
-      </div>
-      <div className="min-w-0 p-3">
-        <h5 className="font-[600]">Phone Number</h5>
-        <h4 className="break-all text-[#000000a6]">{data.phoneNumber}</h4>
-      </div>
-      <div className="min-w-0 p-3">
-        <h5 className="font-[600]">Total Products</h5>
-        <h4 className="text-[#000000a6]">{products && products.length}</h4>
-      </div>
-      <div className="min-w-0 p-3">
-        <h5 className="font-[600]">Shop Ratings</h5>
-        <h4 className="text-[#000000b0]">{ratingDisplay}/5</h4>
-      </div>
-      <div className="min-w-0 p-3">
-        <h5 className="font-[600]">Joined On</h5>
-        <h4 className="text-[#000000b0]">{data?.createdAt?.slice(0, 10)}</h4>
-      </div>
-      {isOwner && (
-        <div className="py-3 px-4">
-           <Link to="/settings">
-           <div className={`${styles.button} !w-full !h-[42px] !rounded-[5px]`}>
-            <span className="text-white">Edit Shop</span>
+
+        {/* Info Rows */}
+        <div className="flex flex-col divide-y divide-gray-50 px-5 py-2">
+
+          <div className="py-3">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Address</p>
+            <p className="text-sm text-gray-700 break-words">{data.address}</p>
           </div>
-           </Link>
-          <div className={`${styles.button} !w-full !h-[42px] !rounded-[5px]`}
-          onClick={logoutHandler}
-          >
-            <span className="text-white">Log Out</span>
+
+          <div className="py-3">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Phone Number</p>
+            <p className="text-sm text-gray-700 break-all">{data.phoneNumber}</p>
           </div>
+
+          <div className="py-3">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Total Products</p>
+            <p className="text-sm text-gray-700">{products && products.length}</p>
+          </div>
+
+          <div className="py-3">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Shop Rating</p>
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-semibold text-gray-800">{ratingDisplay}</span>
+              <span className="text-xs text-gray-400">/ 5</span>
+              <span className="ml-1 text-yellow-400 text-sm">★</span>
+            </div>
+          </div>
+
+          <div className="py-3">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Joined On</p>
+            <p className="text-sm text-gray-700">{data?.createdAt?.slice(0, 10)}</p>
+          </div>
+
         </div>
-      )}
-    </div>
-    )
-   }
-   </>
-  );
+
+        {/* Owner Buttons */}
+        {isOwner && (
+          <div className="flex flex-col gap-2 px-5 pt-2 pb-5">
+            <Link to="/settings">
+              <button className="w-full h-10 rounded-lg border border-teal-600 text-teal-600 text-sm font-medium hover:bg-teal-50 transition-colors">
+                Edit Shop
+              </button>
+            </Link>
+            <button
+              onClick={logoutHandler}
+              className="w-full h-10 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium transition-colors"
+            >
+              Log Out
+            </button>
+          </div>
+        )}
+
+      </div>
+    )}
+  </>
+);
 };
 
 export default ShopInfo;

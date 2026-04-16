@@ -84,86 +84,91 @@ function ProfileContent({ active }) {
       {/* profile  */}
       {
         active === 1 && (
-          <>
-            <div className="flex justify-center w-full">
-              <div className="relative">
-                <img
-                  src={user?.avatar.url}
-                  className="w-[150px] h-[150px] rounded-full object-cover border-[3px] border-[#3ad132]"
-                  alt=""
-                />
-                <div className="w-[30px] h-[30px] bg-[#E3E9EE] rounded-full flex items-center justify-center cursor-pointer absolute bottom-[5px] right-[5px]">
-                  <input
-                    type="file"
-                    id="image"
-                    className="hidden"
-                    onChange={handleImage}
-                  />
-                  <label htmlFor="image">
-                    <AiOutlineCamera />
-                  </label>
-                </div>
-              </div>
-            </div>
-            <br />
-            <br />
-            <div className="w-full px-5">
-              <form onSubmit={handleSubmit} aria-required={true}>
-                <div className="w-full 800px:flex block pb-3">
-                  <div className=" w-[100%] 800px:w-[50%]">
-                    <label className="block pb-2">Full Name</label>
-                    <input
-                      type="text"
-                      className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </div>
-                  <div className=" w-[100%] 800px:w-[50%]">
-                    <label className="block pb-2">Email Address</label>
-                    <input
-                      type="text"
-                      className={`${styles.input} !w-[95%] mb-1 800px:mb-0`}
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                </div>
+      <>
+  {/* Avatar */}
+  <div className="flex justify-center w-full pt-6">
+    <div className="relative">
+      <img
+        src={user?.avatar.url}
+        className="w-[120px] h-[120px] rounded-full object-cover ring-4 ring-teal-50 shadow-sm"
+        alt=""
+      />
+      <div className="w-8 h-8 bg-white border border-gray-200 shadow rounded-full flex items-center justify-center cursor-pointer absolute bottom-1 right-1">
+        <input type="file" id="image" className="hidden" onChange={handleImage} />
+        <label htmlFor="image" className="cursor-pointer flex items-center justify-center">
+          <AiOutlineCamera size={15} className="text-gray-600" />
+        </label>
+      </div>
+    </div>
+  </div>
 
-                <div className="w-full 800px:flex block pb-3">
-                  <div className=" w-[100%] 800px:w-[50%]">
-                    <label className="block pb-2">Phone Number</label>
-                    <input
-                      type="number"
-                      className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
-                      required
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                    />
-                  </div>
+  {/* Form */}
+  <div className="w-full px-5 mt-8">
+    <form onSubmit={handleSubmit} aria-required={true}>
+      <div className="flex flex-col gap-5">
 
-                  <div className=" w-[100%] 800px:w-[50%]">
-                    <label className="block pb-2">Enter your password</label>
-                    <input
-                      type="password"
-                      className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <input
-                  className={`w-[250px] h-[40px] border border-[#3a24db] text-center text-[#3a24db] rounded-[3px] mt-8 cursor-pointer`}
-                  required
-                  value="Update"
-                  type="submit"
-                />
-              </form>
-            </div>
-          </>
+        {/* Row 1 */}
+        <div className="w-full 800px:flex gap-5">
+          <div className="w-full 800px:w-[50%] flex flex-col gap-1.5 mb-4 800px:mb-0">
+            <label className="text-sm font-medium text-gray-700">Full Name</label>
+            <input
+              type="text"
+              className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="w-full 800px:w-[50%] flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-gray-700">Email Address</label>
+            <input
+              type="text"
+              className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Row 2 */}
+        <div className="w-full 800px:flex gap-5">
+          <div className="w-full 800px:w-[50%] flex flex-col gap-1.5 mb-4 800px:mb-0">
+            <label className="text-sm font-medium text-gray-700">Phone Number</label>
+            <input
+              type="number"
+              className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              required
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+            />
+          </div>
+          <div className="w-full 800px:w-[50%] flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-gray-700">Password</label>
+            <input
+              type="password"
+              className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Submit */}
+        <div className="pt-2">
+          <button
+            type="submit"
+            className="h-10 px-8 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            Update Profile
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</>
         )
       }
       {/* order  */}

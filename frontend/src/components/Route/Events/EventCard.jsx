@@ -25,38 +25,43 @@ const addToCartHandler = (data) => {
     }
   }
   return (
-    <div
-       className={`w-full block bg-white rounded-lg ${
-        active ? "unset" : "mb-12"
-      } lg:flex p-2`}
-    >
-      <div className="w-full lg:-w[50%] m-auto">
-        <img src={`${data?.images[0]?.url}`} alt="" />
+     <div className={`w-full bg-white border border-gray-100 rounded-xl overflow-hidden flex flex-col lg:flex-row ${active ? "" : "mb-12"}`}>
+      
+      {/* Image */}
+      <div className="relative w-full lg:w-[340px] shrink-0">
+        <img src={`${data?.images[0]?.url}`} alt="" className="w-full h-full object-cover min-h-[220px]" />
+        <span className="absolute top-3 left-3 bg-teal-600 text-white text-xs font-medium px-3 py-1 rounded-md uppercase tracking-wide">
+          Live Event
+        </span>
       </div>
-      <div className="w-full lg:[w-50%] flex flex-col justify-center">
-         <h2 className={`${styles.productTitle}`}>{data?.name}</h2>
-        <p>{data?.description}</p>
-        <div className="flex py-2 justify-between">
-          <div className="flex">
-            <h5 className="font-[500] text-[18px] text-[#d55b45] pr-3 line-through">
-              {data?.originalPrice}$
-            </h5>
-            <h5 className="font-bold text-[20px] text-[#333] font-Roboto">
-              {data?.discountPrice}$
-            </h5>
-          </div>
-          <span className="pr-3 font-[400] text-[17px] text-[#44a55e]">
-            {data?.sold_out} sold
-          </span>
+
+      {/* Body */}
+      <div className="flex flex-col gap-4 p-6 flex-1">
+        <h2 className="font-serif text-xl text-gray-900 leading-snug">{data?.name}</h2>
+        <p className="text-sm text-gray-500 leading-relaxed line-clamp-3">{data?.description}</p>
+
+        {/* Pricing */}
+        <div className="flex items-baseline gap-3">
+          <span className="text-xl font-semibold text-gray-900">{data?.discountPrice}$</span>
+          <span className="text-sm text-gray-400 line-through">{data?.originalPrice}$</span>
+          <span className="ml-auto text-sm text-teal-600 font-medium">{data?.sold_out} sold</span>
         </div>
-        <CountDown data={data}/>
-        <br />
-        <div className="flex items-center">
-            <Link to={`/product/${data?._id}?isEvent=true`}>
-            <div className={`${styles.button} text-[#fff]`}>See Details</div>
+
+        {/* Countdown */}
+        <CountDown data={data} />
+
+        {/* Actions */}
+        <div className="flex items-center gap-3 mt-auto pt-2">
+          <Link to={`/product/${data?._id}?isEvent=true`}>
+            <button className="h-10 px-5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+              See Details
+            </button>
           </Link>
-        
-          <div className={`${styles.button} text-[#fff] ml-5`}  onClick={() => addToCartHandler(data)}>Add to cart</div>
+          <button
+            onClick={() => addToCartHandler(data)}
+            className="h-10 px-5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-lg">
+            Add to cart
+          </button>
         </div>
       </div>
     </div>
