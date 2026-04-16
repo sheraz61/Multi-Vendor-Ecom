@@ -4,48 +4,52 @@ import ErrorHandler from "../utils/ErrorHandler.js";
 import catchAsyncErrors from "../middleware/catchAsyncErrors.js";
 import express from 'express'
 import { Router } from "express";
-import  upload from "../middleware/multer.js";
 import Messages from "../model/messages.model.js";
-import { uploadToCloudinary } from '../utils/cloudinary.js';
+import cloudinary from "cloudinary"
 
 const router = Router()
 
 
-// create new Message
+// create new message
+router.post(
+  "/create-new-message",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const messageData = req.body;
 
-router.post('/create-new-message', upload.single('images'), catchAsyncErrors(async (req, res, next) => {
-  try {
+      if (req.body.images) {
+        const myCloud = await cloudinary.v2.uploader.upload(req.body.images, {
+          folder: "messages",
+        });
+        messageData.images = {
+          public_id: myCloud.public_id,
+          url: myCloud.url,
+        };
+      }
 
-    const messageData = req.body;
-    if (req.file) {
-      const image = await uploadToCloudinary(req.file.path, "messages");
-      messageData.images = image;
+      messageData.conversationId = req.body.conversationId;
+      messageData.sender = req.body.sender;
+      messageData.text = req.body.text;
+
+      const message = new Messages({
+        conversationId: messageData.conversationId,
+        text: messageData.text,
+        sender: messageData.sender,
+        images: messageData.images ? messageData.images : undefined,
+      });
+
+      await message.save();
+
+      res.status(201).json({
+        success: true,
+        message,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message), 500);
     }
+  })
+);
 
-    messageData.conversationId = req.body.conversationId
-    messageData.sender = req.body.sender
-    messageData.text = req.body.text
-
-    const message = new Messages({
-      conversationId: messageData.conversationId,
-      sender: messageData.sender,
-      text: messageData.text,
-      images: messageData.images || undefined,
-
-
-    })
-
-    await message.save()
-
-    res.status(201).json({
-      success: true,
-      message
-    })
-  } catch (error) {
-    return next(new ErrorHandler(error.response.message), 500)
-
-  }
-}))
 
 // get all messages with conversation id
 router.get(

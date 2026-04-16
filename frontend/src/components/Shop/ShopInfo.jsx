@@ -4,9 +4,10 @@ import { Link, useParams } from "react-router-dom";
 import { server } from "../../server";
 import styles from "../../styles/style";
 import Loader from "../Layout/Loader";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector, } from "react-redux";
+import {useNavigate} from 'react-router-dom';
 import { getAllProductsShop } from "../../redux/actions/product";
-
+import { loadSeller } from "../../redux/actions/shop";
 const ShopInfo = ({ isOwner }) => {
   const [data, setData] = useState({});
   const {products} = useSelector((state) => state.products);
@@ -14,7 +15,7 @@ const ShopInfo = ({ isOwner }) => {
   const { seller } = useSelector((state) => state.shop);
   const { id } = useParams();
   const dispatch = useDispatch();
-
+ const navigate = useNavigate();
  useEffect(() => {
     dispatch(getAllProductsShop(id));
     setIsLoading(true);
@@ -25,18 +26,16 @@ const ShopInfo = ({ isOwner }) => {
       console.log(error);
       setIsLoading(false);
     })
-  }, [dispatch, id]);
+  }, []);
 
 
-  const logoutHandler = async () => {
-    axios.get(`${server}/shop/shop-logout`, { withCredentials: true })
-      .then((res) => {
-       
-        window.location.reload(true);
-      })
-      .catch((error) => {
-        console.log(error.response.data.message);
-      });
+   const logoutHandler = async () => {
+    axios.get(`${server}/shop/logout`,{
+      withCredentials: true,
+    });
+    dispatch(loadSeller());
+    window.location.reload(true);
+    // navigate("/shop-login");
   };
 
     const totalReviewsLength =
@@ -48,7 +47,7 @@ const ShopInfo = ({ isOwner }) => {
     const averageRating =
       totalReviewsLength > 0 ? totalRatings / totalReviewsLength : 0;
     const ratingDisplay =
-      totalReviewsLength > 0 ? averageRating.toFixed(1) : "—";
+      totalReviewsLength > 0 ? averageRating.toFixed(1) : "0.0";
 
   return (
     <>

@@ -1,6 +1,6 @@
 import express from 'express'
 import { Router } from 'express'
-import upload from '../middleware/multer.js'
+import cloudinary from "cloudinary"
 import User from '../model/user.model.js'
 import ErrorHandler from '../utils/ErrorHandler.js'
 import jwt from 'jsonwebtoken'
@@ -8,22 +8,23 @@ import sendMail from '../utils/sendMail.js'
 import catchAsyncErrors from '../middleware/catchAsyncErrors.js'
 import sendToken from '../utils/jwtToken.js'
 import { isAdmin, isAuthenticated } from '../middleware/auth.js'
-import { deleteFromCloudinary, uploadToCloudinary } from '../utils/cloudinary.js'
 import Product from '../model/product.model.js'
 const router = Router()
 
-router.post("/create-user", upload.single('file'), async (req, res, next) => {
+// create user
+router.post("/create-user", async (req, res, next) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, avatar } = req.body;
         const userEmail = await User.findOne({ email });
 
         if (userEmail) {
             return next(new ErrorHandler("User already exists", 400));
         }
-        if (!req.file) {
-            return next(new ErrorHandler("Please upload avatar file", 400));
-        }
-        const myCloud = await uploadToCloudinary(req.file.path, "users");
+
+        const myCloud = await cloudinary.v2.uploader.upload(avatar, {
+            folder: "avatars",
+        });
+
         const user = {
             name: name,
             email: email,
@@ -33,8 +34,11 @@ router.post("/create-user", upload.single('file'), async (req, res, next) => {
                 url: myCloud.secure_url,
             },
         };
-        const activationToken = createActivationToken(user)
-        const activationUrl = `http://localhost:5173/activation/${activationToken}`
+
+        const activationToken = createActivationToken(user);
+
+        const activationUrl = `http://localhost:5173/activation/${activationToken}`;
+
         try {
             await sendMail({
                 email: user.email,
@@ -46,10 +50,10 @@ router.post("/create-user", upload.single('file'), async (req, res, next) => {
                 message: `please check your email:- ${user.email} to activate your account!`,
             });
         } catch (error) {
-            return next(new ErrorHandler(error.message, 500))
+            return next(new ErrorHandler(error.message, 500));
         }
     } catch (error) {
-        return next(new ErrorHandler(error.message, 400))
+        return next(new ErrorHandler(error.message, 400));
     }
 });
 
@@ -103,62 +107,82 @@ router.post('/activation', catchAsyncErrors(async (req, res, next) => {
 }))
 
 
-// login user...
-router.post('/login-user', catchAsyncErrors(async (req, res, next) => {
+// login user
+router.post(
+  "/login-user",
+  catchAsyncErrors(async (req, res, next) => {
     try {
+      const { email, password } = req.body;
 
-        const { email, password } = req.body;
-        if (!email || !password) {
-            return next(new ErrorHandler('Please provide all fields', 400))
-        }
-        const user = await User.findOne({ email }).select('+password')
-        if (!user) {
-            return next(new ErrorHandler('User not found', 404))
-        }
-        const isPasswordValid = await user.comparePassword(password)
-        if (!isPasswordValid) {
-            return next(new ErrorHandler('Wrong password', 404))
-        }
-        sendToken(user, 201, res)
+      if (!email || !password) {
+        return next(new ErrorHandler("Please provide the all fields!", 400));
+      }
+
+      const user = await User.findOne({ email }).select("+password");
+
+      if (!user) {
+        return next(new ErrorHandler("User doesn't exists!", 400));
+      }
+
+      const isPasswordValid = await user.comparePassword(password);
+
+      if (!isPasswordValid) {
+        return next(
+          new ErrorHandler("Please provide the correct information", 400)
+        );
+      }
+
+      sendToken(user, 201, res);
     } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+      return next(new ErrorHandler(error.message, 500));
     }
-}))
+  })
+);
 
 
-// load user 
-router.get('/get-user', isAuthenticated, catchAsyncErrors(async (req, res, next) => {
-    try {
-        const user = await User.findById(req.user.id);
-        if (!user) {
-            return next(new ErrorHandler('User not found', 404))
+// load user
+router.get(
+    "/get-user",
+    isAuthenticated,
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            const user = await User.findById(req.user.id);
 
+            if (!user) {
+                return next(new ErrorHandler("User doesn't exists", 400));
+            }
+
+            res.status(200).json({
+                success: true,
+                user,
+            });
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
         }
-        res.status(200).json({
-            success: true,
-            user,
-        })
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
-    }
-}))
+    })
+);
 
 
-//logout user
-router.get('/logout', isAuthenticated, catchAsyncErrors(async (req, res, next) => {
-    try {
-        res.cookie('token', null, {
-            expires: new Date(Date.now()),
-            httpOnly: true
-        })
-        res.status(201).json({
-            success: true,
-            message: 'logout successfully'
-        })
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
-    }
-}))
+// log out user
+router.get(
+    "/logout",
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            res.cookie("token", null, {
+                expires: new Date(Date.now()),
+                httpOnly: true,
+                sameSite: "none",
+                secure: true,
+            });
+            res.status(201).json({
+                success: true,
+                message: "Logout successful!",
+            });
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
+        }
+    })
+);
 
 const syncUserReviews = async (user) => {
     try {
@@ -215,31 +239,40 @@ router.put("/update-user-info", isAuthenticated, catchAsyncErrors(async (req, re
 );
 
 
-// updata user avatar
-router.put('/update-avatar', isAuthenticated, upload.single('image'), catchAsyncErrors(async (req, res, next) => {
-    try {
-        if (!req.file) {
-            return next(new ErrorHandler("Please upload avatar file", 400));
-        }
-        const existUser = await User.findById(req.user.id)
+// update user avatar
+router.put(
+    "/update-avatar",
+    isAuthenticated,
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            let existsUser = await User.findById(req.user.id);
+            if (req.body.avatar !== "") {
+                const imageId = existsUser.avatar.public_id;
 
-        await deleteFromCloudinary(existUser?.avatar?.public_id);
-        const uploadedAvatar = await uploadToCloudinary(req.file.path, "users");
-        const fileUrl = {
-            public_id: uploadedAvatar.public_id,
-            url: uploadedAvatar.url
+                await cloudinary.v2.uploader.destroy(imageId);
+
+                const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+                    folder: "avatars",
+                    width: 150,
+                });
+
+                existsUser.avatar = {
+                    public_id: myCloud.public_id,
+                    url: myCloud.secure_url,
+                };
+            }
+
+            await existsUser.save();
+            await syncUserReviews(existsUser)
+            res.status(200).json({
+                success: true,
+                user: existsUser,
+            });
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
         }
-        const user = await User.findByIdAndUpdate(req.user.id, { avatar: fileUrl }, { new: true })
-        // sync reviews
-        await syncUserReviews(user);
-        res.status(201).json({
-            success: true,
-            user,
-        })
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
-    }
-}))
+    })
+);
 
 // update user addresses
 router.put(

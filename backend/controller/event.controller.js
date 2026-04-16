@@ -1,39 +1,60 @@
 import { Router } from 'express'
 import Event from '../model/event.model.js'
-import upload from '../middleware/multer.js'
 import catchAsyncErrors from '../middleware/catchAsyncErrors.js'
 import ErrorHandler from '../utils/ErrorHandler.js'
 import Shop from '../model/shop.model.js'
 import { isAdmin, isAuthenticated, isSeller } from '../middleware/auth.js'
-import { deleteFromCloudinary, uploadToCloudinary } from '../utils/cloudinary.js'
-
+import cloudinary from "cloudinary"
 
 const router = Router()
-router.post('/create-event', upload.array('images'), catchAsyncErrors(async (req, res, next) => {
+// create event
+router.post(
+  "/create-event",
+  catchAsyncErrors(async (req, res, next) => {
     try {
-        const shopId = req.body.shopId
-        const shop = await Shop.findById(shopId)
-        if (!shop) {
-            return next(new ErrorHandler('Shop did not exist', 404))
-        } else {
-            const files = req.files;
-            const imageUrls = await Promise.all(
-                files.map((file) => uploadToCloudinary(file.path, "events"))
-            );
-            const eventData = req.body;
-            eventData.images = imageUrls
-            eventData.shop = shop
-            const event = await Event.create(eventData)
+      const shopId = req.body.shopId;
+      const shop = await Shop.findById(shopId);
+      if (!shop) {
+        return next(new ErrorHandler("Shop Id is invalid!", 400));
+      } else {
+        let images = [];
 
-            res.status(201).json({
-                success: true,
-                event
-            })
+        if (typeof req.body.images === "string") {
+          images.push(req.body.images);
+        } else {
+          images = req.body.images;
         }
+
+        const imagesLinks = [];
+
+        for (let i = 0; i < images.length; i++) {
+          const result = await cloudinary.v2.uploader.upload(images[i], {
+            folder: "products",
+          });
+
+          imagesLinks.push({
+            public_id: result.public_id,
+            url: result.secure_url,
+          });
+        }
+
+        const productData = req.body;
+        productData.images = imagesLinks;
+        productData.shop = shop;
+
+        const event = await Event.create(productData);
+
+        res.status(201).json({
+          success: true,
+          event,
+        });
+      }
     } catch (error) {
-        return next(new ErrorHandler(error, 400))
+      return next(new ErrorHandler(error, 400));
     }
-}))
+  })
+);
+
 
 
 //get all event of the shop
@@ -53,38 +74,33 @@ router.get('/get-all-events/:id', catchAsyncErrors(async (req, res, next) => {
 
 // delete event of a shop
 router.delete(
-    "/delete-shop-event/:id",
-    catchAsyncErrors(async (req, res, next) => {
-        try {
-            const event = await Event.findById(req.params.id);
+  "/delete-shop-event/:id",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const event = await Event.findById(req.params.id);
 
-            if (!event) {
-                return next(new ErrorHandler("Event is not found with this id", 404));
-            }
+      if (!event) {
+        return next(new ErrorHandler("Event is not found with this id", 404));
+      }    
 
-            //   for (let i = 0; 1 < event.images.length; i++) {
-            //     const result = await cloudinary.v2.uploader.destroy(
-            //       event.images[i].public_id
-            //     );
-            //   }
-            await Promise.all(
-                (event.images || []).map((image) =>
-                    deleteFromCloudinary(typeof image === "string" ? image : image?.public_id)
-                )
-            );
-            await Event.findByIdAndDelete(req.params.id)
+      for (let i = 0; 1 < event.images.length; i++) {
+        const result = await cloudinary.v2.uploader.destroy(
+          event.images[i].public_id
+        );
+      }
+    
+      await event.remove();
 
-
-
-            res.status(201).json({
-                success: true,
-                message: "Event Deleted successfully!",
-            });
-        } catch (error) {
-            return next(new ErrorHandler(error, 400));
-        }
-    })
+      res.status(201).json({
+        success: true,
+        message: "Event Deleted successfully!",
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error, 400));
+    }
+  })
 );
+
 
 
 // get all events

@@ -1,42 +1,62 @@
 import { Router } from 'express'
 import Product from '../model/product.model.js'
-import upload from '../middleware/multer.js'
 import catchAsyncErrors from '../middleware/catchAsyncErrors.js'
 import ErrorHandler from '../utils/ErrorHandler.js'
 import Shop from '../model/shop.model.js'
 import { isAdmin, isAuthenticated, isSeller } from '../middleware/auth.js'
-import { deleteFromCloudinary, uploadToCloudinary } from '../utils/cloudinary.js'
 import Order from '../model/order.model.js'
 import mongoose from 'mongoose'
-
+import cloudinary from "cloudinary"
 
 
 const router = Router()
-router.post('/create-product', upload.array('images'), catchAsyncErrors(async (req, res, next) => {
-  try {
-    const shopId = req.body.shopId
-    const shop = await Shop.findById(shopId)
-    if (!shop) {
-      return next(new ErrorHandler('Shop did not exist', 404))
-    } else {
-      const files = req.files;
-      const imageUrls = await Promise.all(
-        files.map((file) => uploadToCloudinary(file.path, "products"))
-      );
-      const productData = req.body;
-      productData.images = imageUrls
-      productData.shop = shop
-      const product = await Product.create(productData)
+// create product
+router.post(
+  "/create-product",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const shopId = req.body.shopId;
+      const shop = await Shop.findById(shopId);
+      if (!shop) {
+        return next(new ErrorHandler("Shop Id is invalid!", 400));
+      } else {
+        let images = [];
 
-      res.status(201).json({
-        success: true,
-        product
-      })
+        if (typeof req.body.images === "string") {
+          images.push(req.body.images);
+        } else {
+          images = req.body.images;
+        }
+      
+        const imagesLinks = [];
+      
+        for (let i = 0; i < images.length; i++) {
+          const result = await cloudinary.v2.uploader.upload(images[i], {
+            folder: "products",
+          });
+      
+          imagesLinks.push({
+            public_id: result.public_id,
+            url: result.secure_url,
+          });
+        }
+      
+        const productData = req.body;
+        productData.images = imagesLinks;
+        productData.shop = shop;
+
+        const product = await Product.create(productData);
+
+        res.status(201).json({
+          success: true,
+          product,
+        });
+      }
+    } catch (error) {
+      return next(new ErrorHandler(error, 400));
     }
-  } catch (error) {
-    return next(new ErrorHandler(error, 400))
-  }
-}))
+  })
+);
 
 //get all product of the shop
 router.get('/get-all-products-shop/:id', catchAsyncErrors(async (req, res, next) => {
@@ -53,32 +73,36 @@ router.get('/get-all-products-shop/:id', catchAsyncErrors(async (req, res, next)
 }))
 
 
-//delete product
-router.delete('/delete-shop-product/:id', isSeller, catchAsyncErrors(async (req, res, next) => {
-  try {
-    const productId = req.params.id
-    const productData = await Product.findById(productId)
+// delete product of a shop
+router.delete(
+  "/delete-shop-product/:id",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const product = await Product.findById(req.params.id);
 
-    if (!productData) {
-      return next(new ErrorHandler('Product not found with this id', 500))
+      if (!product) {
+        return next(new ErrorHandler("Product is not found with this id", 404));
+      }    
+
+      for (let i = 0; 1 < product.images.length; i++) {
+        const result = await cloudinary.v2.uploader.destroy(
+          product.images[i].public_id
+        );
+      }
+    
+      await product.remove();
+
+      res.status(201).json({
+        success: true,
+        message: "Product Deleted successfully!",
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error, 400));
     }
+  })
+);
 
-    await Promise.all(
-      (productData.images || []).map((image) =>
-        deleteFromCloudinary(image?.public_id)
-      )
-    );
-    const product = await Product.findByIdAndDelete(productId)
-
-    res.status(200).json({
-      success: true,
-      message: 'Product delete successfully',
-    })
-  } catch (error) {
-    return next(new ErrorHandler(error, 400))
-
-  }
-}))
 
 // get all products
 router.get(

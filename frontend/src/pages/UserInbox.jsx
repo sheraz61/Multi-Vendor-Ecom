@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { AiOutlineArrowRight, AiOutlineSend } from "react-icons/ai";
 import { TfiGallery } from "react-icons/tfi";
 import styles from "../styles/style";
-const ENDPOINT = "http://localhost:3000/";
+const ENDPOINT = "https://chat-server-45wh.onrender.com";
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
 const UserInbox = () => {
@@ -148,17 +148,19 @@ const UserInbox = () => {
   };
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0]
-    setImages(file)
-    imageSendingHandler(file)
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (reader.readyState === 2) {
+        setImages(reader.result);
+        imageSendingHandler(reader.result);
+      }
+    };
+
+    reader.readAsDataURL(e.target.files[0]);
   };
 
- const imageSendingHandler = async (e) => {
-    const fromData = new FormData()
-    fromData.append('images', e)
-    fromData.append('sender', user._id)
-    fromData.append('text', newMessage)
-    fromData.append('conversationId', currentChat._id)
+  const imageSendingHandler = async (e) => {
 
     const receiverId = currentChat.members.find(
       (member) => member !== user._id
@@ -172,7 +174,15 @@ const UserInbox = () => {
 
     try {
       await axios
-        .post(`${server}/message/create-new-message`, fromData)
+        .post(
+          `${server}/message/create-new-message`,
+          {
+            images: e,
+            sender: user._id,
+            text: newMessage,
+            conversationId: currentChat._id,
+          }
+        )
         .then((res) => {
           setImages();
           setMessages([...messages, res.data.message]);
@@ -181,7 +191,7 @@ const UserInbox = () => {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   const updateLastMessageForImage = async () => {
     await axios.put(
@@ -191,7 +201,7 @@ const UserInbox = () => {
         lastMessageId: user._id,
       }
     );
-  }
+  };
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ beahaviour: "smooth" });
@@ -199,9 +209,9 @@ const UserInbox = () => {
 
   return (
     <div className="w-full">
-      <Header/>
       {!open && (
         <>
+          <Header />
           <h1 className="text-center text-[30px] py-3 font-Poppins">
             All Messages
           </h1>
@@ -278,7 +288,7 @@ const MessageList = ({
   }, [me, data]);
 
   return (
-      <div
+    <div
       className={`w-full flex p-3 px-3 ${
         active === index ? "bg-[#00000010]" : "bg-transparent"
       }  cursor-pointer`}
@@ -305,9 +315,9 @@ const MessageList = ({
       <div className="pl-3">
         <h1 className="text-[18px]">{user?.name}</h1>
         <p className="text-[16px] text-[#000c]">
-          {!loading && data?.lastMessageId !== user?._id
+          {!loading && data?.lastMessageId !== userData?._id
             ? "You:"
-            : user?.name.split(" ")[0] + ": "}{" "}
+            : userData?.name.split(" ")[0] + ": "}{" "}
           {data?.lastMessage}
         </p>
       </div>
@@ -328,7 +338,7 @@ const SellerInbox = ({
   handleImageUpload,
 }) => {
   return (
-    <div className="w-full min-h-full flex flex-col justify-between">
+    <div className="w-[full] min-h-full flex flex-col justify-between p-5">
       {/* message header */}
       <div className="w-full flex p-3 items-center justify-between bg-slate-200">
         <div className="flex">
@@ -350,47 +360,45 @@ const SellerInbox = ({
       </div>
 
       {/* messages */}
-      <div className="px-3 h-[65vh] py-3 overflow-y-scroll">
+      <div className="px-3 h-[75vh] py-3 overflow-y-scroll">
         {messages &&
-          messages.map((item, index) => {
-            return (
-              <div
-                className={`flex w-full my-2 ${
-                  item.sender === sellerId ? "justify-end" : "justify-start"
-                }`}
-                ref={scrollRef}
-              >
-                {item.sender !== sellerId && (
-                  <img
-                    src={`${userData?.avatar?.url}`}
-                    className="w-[40px] h-[40px] rounded-full mr-3"
-                    alt=""
-                  />
-                )}
-                {item.images && (
-                  <img
-                    src={`${item.images?.url}`}
-                    className="w-[300px] h-[300px] object-cover rounded-[10px] mr-2"
-                  />
-                )}
-                {item.text !== "" && (
-                  <div>
-                    <div
-                      className={`w-max p-2 rounded ${
-                        item.sender === sellerId ? "bg-[#000]" : "bg-[#38c776]"
-                      } text-[#fff] h-min`}
-                    >
-                      <p>{item.text}</p>
-                    </div>
-
-                    <p className="text-[12px] text-[#000000d3] pt-1">
-                      {format(item.createdAt)}
-                    </p>
+          messages.map((item, index) => (
+            <div
+              className={`flex w-full my-2 ${
+                item.sender === sellerId ? "justify-end" : "justify-start"
+              }`}
+              ref={scrollRef}
+            >
+              {item.sender !== sellerId && (
+                <img
+                  src={`${userData?.avatar?.url}`}
+                  className="w-[40px] h-[40px] rounded-full mr-3"
+                  alt=""
+                />
+              )}
+              {item.images && (
+                <img
+                  src={`${item.images?.url}`}
+                  className="w-[300px] h-[300px] object-cover rounded-[10px] ml-2 mb-2"
+                />
+              )}
+              {item.text !== "" && (
+                <div>
+                  <div
+                    className={`w-max p-2 rounded ${
+                      item.sender === sellerId ? "bg-[#000]" : "bg-[#38c776]"
+                    } text-[#fff] h-min`}
+                  >
+                    <p>{item.text}</p>
                   </div>
-                )}
-              </div>
-            );
-          })}
+
+                  <p className="text-[12px] text-[#000000d3] pt-1">
+                    {format(item.createdAt)}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
       </div>
 
       {/* send message input */}

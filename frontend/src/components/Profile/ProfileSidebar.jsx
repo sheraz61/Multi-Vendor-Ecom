@@ -11,23 +11,21 @@ import { TbAddressBook } from "react-icons/tb";
 import { RxPerson } from "react-icons/rx";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { server } from '../../server';
 import axios from 'axios'
+import { loadUser } from '../../redux/actions/user';
 function ProfileSidebar({ setActive, active }) {
+    const dispatch = useDispatch()
     const navigate = useNavigate();
     const { user } = useSelector((state) => state.user)
     const logoutHandler = () => {
         axios
             .get(`${server}/user/logout`, { withCredentials: true })
-            .then((res) => {
-                toast.success(res.data.message);
-                navigate("/login");
-                window.location.reload(true);
-            })
-            .catch((error) => {
-                console.log(error.response.data.message);
-            });
+        dispatch(loadUser())
+        window.location.reload(true);
+        // navigate("/login");
+
     }
     return (
         <div className="w-full bg-white shadow-sm rounded-[10px] p-4 pt-8">

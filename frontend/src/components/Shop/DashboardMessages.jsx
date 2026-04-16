@@ -9,12 +9,11 @@ import styles from "../../styles/style";
 import { TfiGallery } from "react-icons/tfi";
 import socketIO from "socket.io-client";
 import { format } from "timeago.js";
-const ENDPOINT = "http://localhost:3000/";
+const ENDPOINT = "https://chat-server-45wh.onrender.com";
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
-
 const DashboardMessages = () => {
-  const { seller, loadingSeller } = useSelector((state) => state.shop);
+  const { seller,isLoading } = useSelector((state) => state.shop);
   const [conversations, setConversations] = useState([]);
   const [arrivalMessage, setArrivalMessage] = useState(null);
   const [currentChat, setCurrentChat] = useState();
@@ -27,6 +26,21 @@ const DashboardMessages = () => {
   const [open, setOpen] = useState(false);
   const scrollRef = useRef(null);
 
+  useEffect(() => {
+    socketId.on("getMessage", (data) => {
+      setArrivalMessage({
+        sender: data.senderId,
+        text: data.text,
+        createdAt: Date.now(),
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    arrivalMessage &&
+      currentChat?.members.includes(arrivalMessage.sender) &&
+      setMessages((prev) => [...prev, arrivalMessage]);
+  }, [arrivalMessage, currentChat]);
 
   useEffect(() => {
     const getConversation = async () => {
@@ -63,24 +77,6 @@ const DashboardMessages = () => {
     return online ? true : false;
   };
 
-
-  useEffect(() => {
-    socketId.on('getMessage', (data) => {
-      setArrivalMessage({
-        sender: data.senderId,
-        text: data.text,
-        createdAt: Date.now()
-      })
-    })
-  }, [])
-
-  useEffect(() => {
-    arrivalMessage &&
-      currentChat?.members.includes(arrivalMessage.sender) &&
-      setMessages((prev) => [...prev, arrivalMessage]);
-  }, [arrivalMessage, currentChat]);
-
-
   // get messages
   useEffect(() => {
     const getMessage = async () => {
@@ -105,12 +101,13 @@ const DashboardMessages = () => {
       text: newMessage,
       conversationId: currentChat._id,
     };
+
     const receiverId = currentChat.members.find(
-      (member) => member !== seller?._id
+      (member) => member.id !== seller._id
     );
 
     socketId.emit("sendMessage", {
-      senderId: seller?._id,
+      senderId: seller._id,
       receiverId,
       text: newMessage,
     });
@@ -153,19 +150,19 @@ const DashboardMessages = () => {
   };
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0]
-    setImages(file)
-    imageSendingHandler(file)
+    const reader = new FileReader();
 
-  }
+    reader.onload = () => {
+      if (reader.readyState === 2) {
+        setImages(reader.result);
+        imageSendingHandler(reader.result);
+      }
+    };
+
+    reader.readAsDataURL(e.target.files[0]);
+  };
 
   const imageSendingHandler = async (e) => {
-    const fromData = new FormData()
-    fromData.append('images', e)
-    fromData.append('sender', seller._id)
-    fromData.append('text', newMessage)
-    fromData.append('conversationId', currentChat._id)
-
     const receiverId = currentChat.members.find(
       (member) => member !== seller._id
     );
@@ -178,7 +175,12 @@ const DashboardMessages = () => {
 
     try {
       await axios
-        .post(`${server}/message/create-new-message`, fromData)
+        .post(`${server}/message/create-new-message`, {
+          images: e,
+          sender: seller._id,
+          text: newMessage,
+          conversationId: currentChat._id,
+        })
         .then((res) => {
           setImages();
           setMessages([...messages, res.data.message]);
@@ -187,7 +189,8 @@ const DashboardMessages = () => {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
+
   const updateLastMessageForImage = async () => {
     await axios.put(
       `${server}/conversation/update-last-message/${currentChat._id}`,
@@ -196,7 +199,11 @@ const DashboardMessages = () => {
         lastMessageId: seller._id,
       }
     );
-  }
+  };
+
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ beahaviour: "smooth" });
+  }, [messages]);
 
   return (
     <div className="w-[90%] bg-white m-5 h-[85vh] overflow-y-scroll rounded">
@@ -219,11 +226,12 @@ const DashboardMessages = () => {
                 userData={userData}
                 online={onlineCheck(item)}
                 setActiveStatus={setActiveStatus}
-                loadingSeller={loadingSeller}
+                isLoading={isLoading}
               />
             ))}
         </>
       )}
+
       {open && (
         <SellerInbox
           setOpen={setOpen}
@@ -240,9 +248,8 @@ const DashboardMessages = () => {
         />
       )}
     </div>
-  )
-}
-
+  );
+};
 
 const MessageList = ({
   data,
@@ -253,8 +260,9 @@ const MessageList = ({
   setUserData,
   online,
   setActiveStatus,
-  loadingSeller
+  isLoading
 }) => {
+  console.log(data);
   const [user, setUser] = useState([]);
   const navigate = useNavigate();
   const handleClick = (id) => {
@@ -276,8 +284,9 @@ const MessageList = ({
     };
     getUser();
   }, [me, data]);
+
   return (
-     <div
+    <div
       className={`w-full flex p-3 px-3 ${
         active === index ? "bg-[#00000010]" : "bg-transparent"
       }  cursor-pointer`}
@@ -304,7 +313,7 @@ const MessageList = ({
       <div className="pl-3">
         <h1 className="text-[18px]">{user?.name}</h1>
         <p className="text-[16px] text-[#000c]">
-          {!loadingSeller && data?.lastMessageId !== user?._id
+          {!isLoading && data?.lastMessageId !== user?._id
             ? "You:"
             : user?.name.split(" ")[0] + ": "}{" "}
           {data?.lastMessage}
@@ -327,7 +336,7 @@ const SellerInbox = ({
   handleImageUpload,
 }) => {
   return (
-     <div className="w-full min-h-full flex flex-col justify-between">
+    <div className="w-full min-h-full flex flex-col justify-between">
       {/* message header */}
       <div className="w-full flex p-3 items-center justify-between bg-slate-200">
         <div className="flex">
@@ -432,5 +441,4 @@ const SellerInbox = ({
   );
 };
 
-export default DashboardMessages
-
+export default DashboardMessages;

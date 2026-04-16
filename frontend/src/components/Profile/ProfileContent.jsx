@@ -33,6 +33,7 @@ function ProfileContent({ active }) {
   const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState(null);
   const dispatch = useDispatch();
+
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -43,28 +44,41 @@ function ProfileContent({ active }) {
       dispatch({ type: "clearMessages" });
     }
   }, [error, successMessage]);
-  const handleImage = async (e) => {
-    const file = e.target.files[0]
-    setAvatar(file)
 
-    const formData = new FormData()
-    formData.append('image', e.target.files[0])
-    await axios.put(`${server}/user/update-avatar`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      withCredentials: true
-    }).then((res) => {
-      dispatch(loadUser())
-      toast.success('Avatar change successfully')
-    }).catch((err) => {
-      toast.error(err)
-    })
-  }
+
+  const handleImage = async (e) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (reader.readyState === 2) {
+        setAvatar(reader.result);
+        axios
+          .put(
+            `${server}/user/update-avatar`,
+            { avatar: reader.result },
+            {
+              withCredentials: true,
+            }
+          )
+          .then((response) => {
+            dispatch(loadUser());
+            toast.success("avatar updated successfully!");
+          })
+          .catch((error) => {
+            toast.error(error);
+          });
+      }
+    };
+
+    reader.readAsDataURL(e.target.files[0]);
+  };
+
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     dispatch(updateUserInformation(name, email, phoneNumber, password));
-  }
+  };
+
+
   return (
     <div className='w-full'>
       {/* profile  */}

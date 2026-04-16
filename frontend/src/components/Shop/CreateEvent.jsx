@@ -22,17 +22,16 @@ const CreateEvent = () => {
   const [stock, setStock] = useState();
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [minEndDate, setMinEndDate] = useState("");
 
   const handleStartDateChange = (e) => {
     const startDate = new Date(e.target.value);
-    const minEnd  = new Date(startDate.getTime() + 3 * 24 * 60 * 60 * 1000);
+    const minEndDate = new Date(startDate.getTime() + 3 * 24 * 60 * 60 * 1000);
     setStartDate(startDate);
     setEndDate(null);
-     setMinEndDate(minEnd.toISOString().slice(
+    document.getElementById("end-date").min = minEndDate.toISOString.slice(
       0,
       10
-    ))
+    );
   };
 
   const handleEndDateChange = (e) => {
@@ -42,7 +41,7 @@ const CreateEvent = () => {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  const minEnd = startDate
+  const minEndDate = startDate
     ? new Date(startDate.getTime() + 3 * 24 * 60 * 60 * 1000)
         .toISOString()
         .slice(0, 10)
@@ -60,32 +59,44 @@ const CreateEvent = () => {
   }, [dispatch, error, success]);
 
   const handleImageChange = (e) => {
-    e.preventDefault()
-        let files = Array.from(e.target.files);
-        setImages((prevImg) => [...prevImg, ...files])
+    const files = Array.from(e.target.files);
+
+    setImages([]);
+
+    files.forEach((file) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        if (reader.readyState === 2) {
+          setImages((old) => [...old, reader.result]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleSubmit = (e) => {
-     e.preventDefault();
-    
-            const newForm = new FormData();
-    
-            images.forEach((image) => {
-              newForm.append("images", image);
-            });
-            newForm.append("name", name);
-            newForm.append("description", description);
-            newForm.append("category", category);
-            newForm.append("tags", tags);
-            newForm.append("originalPrice", originalPrice);
-            newForm.append("discountPrice", discountPrice);
-            newForm.append("stock", stock);
-            newForm.append("shopId", seller._id);
-            newForm.append("start_Date",startDate.toISOString() );
-            newForm.append("Finish_Date",endDate.toISOString() );
-            dispatch(
-              createEvent(newForm)
-            );
+    e.preventDefault();
+
+    const newForm = new FormData();
+
+    images.forEach((image) => {
+      newForm.append("images", image);
+    });
+    const data = {
+      name,
+      description,
+      category,
+      tags,
+      originalPrice,
+      discountPrice,
+      stock,
+      images,
+      shopId: seller._id,
+      start_Date: startDate?.toISOString(),
+      Finish_Date: endDate?.toISOString(),
+    };
+    dispatch(createEvent(data));
   };
 
   return (
@@ -247,7 +258,7 @@ const CreateEvent = () => {
             {images &&
               images.map((i) => (
                 <img
-                  src={URL.createObjectURL(i)}
+                  src={i}
                   key={i}
                   alt=""
                   className="h-[120px] w-[120px] object-cover m-2"

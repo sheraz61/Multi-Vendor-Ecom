@@ -1,6 +1,6 @@
 import express from 'express'
 import { Router } from 'express'
-import upload from '../middleware/multer.js'
+import cloudinary from "cloudinary"
 import Shop from '../model/shop.model.js'
 import ErrorHandler from '../utils/ErrorHandler.js'
 import jwt from 'jsonwebtoken'
@@ -8,33 +8,32 @@ import sendMail from '../utils/sendMail.js'
 import catchAsyncErrors from '../middleware/catchAsyncErrors.js'
 import sendShopToken from '../utils/shopToken.js'
 import { isAdmin, isAuthenticated, isSeller } from '../middleware/auth.js'
-import { deleteFromCloudinary, uploadToCloudinary } from '../utils/cloudinary.js'
 import Product from '../model/product.model.js'
 import Event from '../model/event.model.js'
 const router = Router()
 
 // create shop
-router.post("/create-shop", upload.single('file'), catchAsyncErrors(async (req, res, next) => {
+router.post("/create-shop", catchAsyncErrors(async (req, res, next) => {
     try {
         const { email } = req.body;
         const sellerEmail = await Shop.findOne({ email });
-        if (!req.file) {
-            return next(new ErrorHandler("Please upload avatar file", 400));
-        }
         if (sellerEmail) {
             return next(new ErrorHandler("User already exists", 400));
         }
 
-        const uploadedAvatar = await uploadToCloudinary(req.file.path, "shops");
-        const fileUrl = {
-            public_id: uploadedAvatar.public_id,
-            url: uploadedAvatar.url
-        }
+        const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+            folder: "avatars",
+        });
+
+
         const seller = {
             name: req.body.name,
             email: email,
             password: req.body.password,
-            avatar: fileUrl,
+            avatar: {
+                public_id: myCloud.public_id,
+                url: myCloud.secure_url,
+            },
             address: req.body.address,
             phoneNumber: req.body.phoneNumber,
             zipCode: req.body.zipCode,
@@ -42,13 +41,7 @@ router.post("/create-shop", upload.single('file'), catchAsyncErrors(async (req, 
 
         const activationToken = createActivationToken(seller);
 
-        const frontendBase =
-            process.env.FRONTEND_URL || "http://localhost:5173";
-        // Query param avoids JWT dots being treated oddly in paths; encode for email clients.
-        const activationUrl = `${frontendBase}/shop/activation/${encodeURIComponent(
-            activationToken
-        )}`;
-
+        const activationUrl = `http://localhost:5173/shop/activation/${activationToken}`;
 
         try {
             await sendMail({
@@ -159,38 +152,48 @@ router.post('/login-shop', catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler(error.message, 500));
     }
 }))
-//load shop
-router.get('/get-seller', isSeller, catchAsyncErrors(async (req, res, next) => {
-    try {
-        const seller = await Shop.findById(req.seller.id);
-        if (!seller) {
-            return next(new ErrorHandler('User not found', 404))
+// load shop
+router.get(
+    "/get-seller",
+    isSeller,
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            const seller = await Shop.findById(req.seller._id);
 
+            if (!seller) {
+                return next(new ErrorHandler("User doesn't exists", 400));
+            }
+
+            res.status(200).json({
+                success: true,
+                seller,
+            });
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
         }
-        res.status(200).json({
-            success: true,
-            seller,
-        })
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
-    }
-}))
+    })
+);
 
-//logout from shop
-router.get('/shop-logout', isSeller, catchAsyncErrors(async (req, res, next) => {
-    try {
-        res.cookie('seller_token', null, {
-            expires: new Date(Date.now()),
-            httpOnly: true
-        })
-        res.status(201).json({
-            success: true,
-            message: 'logout successfully'
-        })
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
-    }
-}))
+// log out from shop
+router.get(
+    "/logout",
+    catchAsyncErrors(async (req, res, next) => {
+        try {
+            res.cookie("seller_token", null, {
+                expires: new Date(Date.now()),
+                httpOnly: true,
+                sameSite: "none",
+                secure: true,
+            });
+            res.status(201).json({
+                success: true,
+                message: "Log out successful!",
+            });
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
+        }
+    })
+);
 
 // get shop info
 router.get(
@@ -213,26 +216,31 @@ router.get(
 router.put(
     "/update-shop-avatar",
     isSeller,
-    upload.single('file'),
     catchAsyncErrors(async (req, res, next) => {
         try {
-            if (!req.file) {
-                return next(new ErrorHandler("Please upload avatar file", 400));
-            }
-            const existUser = await Shop.findById(req.seller.id)
+            let existsSeller = await Shop.findById(req.seller._id);
 
-            await deleteFromCloudinary(existUser?.avatar?.public_id);
-            const uploadedAvatar = await uploadToCloudinary(req.file.path, "shops");
-            const fileUrl = {
-                public_id: uploadedAvatar.public_id,
-                url: uploadedAvatar.url
-            }
-            const seller = await Shop.findByIdAndUpdate(req.seller.id, { avatar: fileUrl }, { new: true })
+            const imageId = existsSeller.avatar.public_id;
+
+            await cloudinary.v2.uploader.destroy(imageId);
+
+            const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+                folder: "avatars",
+                width: 150,
+            });
+
+            existsSeller.avatar = {
+                public_id: myCloud.public_id,
+                url: myCloud.secure_url,
+            };
+
+
+            await existsSeller.save();
             await Product.updateMany(
                 { shopId: req.seller.id },
                 {
                     $set: {
-                        shop: seller, 
+                        shop: existsSeller, // 🔥 overwrite full shop object
                     },
                 }
             );
@@ -240,14 +248,14 @@ router.put(
                 { shopId: req.seller.id },
                 {
                     $set: {
-                        shop: seller, 
+                        shop: existsSeller, // 🔥 overwrite full shop object
                     },
                 }
             );
-            res.status(201).json({
+            res.status(200).json({
                 success: true,
-                seller,
-            })
+                seller: existsSeller,
+            });
         } catch (error) {
             return next(new ErrorHandler(error.message, 500));
         }
@@ -283,7 +291,7 @@ router.put(
                     },
                 }
             );
-             await Event.updateMany(
+            await Event.updateMany(
                 { shopId: req.seller.id },
                 {
                     $set: {
