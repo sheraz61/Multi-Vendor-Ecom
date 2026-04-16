@@ -37,9 +37,9 @@ router.post("/create-user", async (req, res, next) => {
 
         const activationToken = createActivationToken(user);
 
-        const activationUrl = `http://localhost:5173/activation/${activationToken}`;
+        const activationUrl = `https://multi-vendor-ecom-seven.vercel.app/activation/${activationToken}`;
 
-        try {
+        try { 
             await sendMail({
                 email: user.email,
                 subject: "Activate your account",

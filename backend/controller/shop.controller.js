@@ -41,7 +41,7 @@ router.post("/create-shop", catchAsyncErrors(async (req, res, next) => {
 
         const activationToken = createActivationToken(seller);
 
-        const activationUrl = `http://localhost:5173/shop/activation/${activationToken}`;
+        const activationUrl = `https://multi-vendor-ecom-seven.vercel.app/shop/activation/${activationToken}`;
 
         try {
             await sendMail({
