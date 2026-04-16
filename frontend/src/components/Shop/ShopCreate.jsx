@@ -19,7 +19,11 @@ const ShopCreate = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+// 🔥 validation check
+  if (password.length < 6) {
+    toast.error("Password must be at least 6 characters long");
+    return;
+  }
     axios
       .post(`${server}/shop/create-shop`, {
         name,
