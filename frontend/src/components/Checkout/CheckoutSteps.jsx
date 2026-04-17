@@ -1,43 +1,49 @@
 import React from 'react'
 import styles from '../../styles/style'
 
-const CheckoutSteps = ({active}) => {
-    console.log(active);
+const CheckoutSteps = ({ active }) => {
+  const steps = ["Shipping", "Payment", "Success"];
+
   return (
-    <div className='w-full flex justify-center'>
-        <div className="w-[90%] 800px:w-[50%] flex items-center flex-wrap">
-               <div className={`${styles.normalFlex}`}>
-                <div className={`${styles.cart_button}`}>
-                       <span className={`${styles.cart_button_text}`}>1.Shipping</span>
-                </div>
-                <div className={`${
-                    active > 1 ? "w-[30px] 800px:w-[70px] h-[4px] !bg-[#f63b60]"
-                    : "w-[30px] 800px:w-[70px] h-[4px] !bg-[#FDE1E6]"
-                }`} />
-               </div>
+    <div className="w-full flex justify-center py-6">
+      <div className="flex items-center">
+        {steps.map((step, index) => {
+          const stepNumber = index + 1;
+          const isCompleted = active > stepNumber;
+          const isCurrent = active === stepNumber;
 
-               <div className={`${styles.normalFlex}`}>
-                <div className={`${active > 1 ? `${styles.cart_button}` : `${styles.cart_button} !bg-[#FDE1E6]`}`}>
-                    <span className={`${active > 1 ? `${styles.cart_button_text}` : `${styles.cart_button_text} !text-[#f63b60]`}`}>
-                        2.Payment
-                    </span>
+          return (
+            <div key={index} className="flex items-center">
+              {/* Step Circle + Label */}
+              <div className="flex flex-col items-center gap-1.5">
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-colors
+                  ${isCompleted ? "bg-teal-600 text-white"
+                    : isCurrent ? "bg-teal-600 text-white"
+                    : "bg-gray-100 text-gray-400"}`}>
+                  {isCompleted ? (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : stepNumber}
                 </div>
-               </div>
+                <span className={`text-xs font-medium whitespace-nowrap
+                  ${isCompleted || isCurrent ? "text-teal-600" : "text-gray-400"}`}>
+                  {step}
+                </span>
+              </div>
 
-               <div className={`${styles.normalFlex}`}>
-               <div className={`${
-                    active > 3 ? "w-[30px] 800px:w-[70px] h-[4px] !bg-[#f63b60]"
-                    : "w-[30px] 800px:w-[70px] h-[4px] !bg-[#FDE1E6]"
-                }`} />
-                <div className={`${active > 2 ? `${styles.cart_button}` : `${styles.cart_button} !bg-[#FDE1E6]`}`}>
-                    <span className={`${active > 2 ? `${styles.cart_button_text}` : `${styles.cart_button_text} !text-[#f63b60]`}`}>
-                        3.Success
-                    </span>
-                </div>
-               </div>
-        </div>
+              {/* Connector line between steps */}
+              {index < steps.length - 1 && (
+                <div className={`w-[50px] 800px:w-[90px] h-[2px] mx-2 mb-5 rounded-full transition-colors
+                  ${active > stepNumber ? "bg-teal-600" : "bg-gray-200"}`}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
-  )
-}
+  );
+};
 
 export default CheckoutSteps

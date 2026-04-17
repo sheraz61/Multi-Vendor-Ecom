@@ -113,7 +113,7 @@ function ProductDetails({ data }) {
   const averageRating = avg.toFixed(2);
   return (
    // Outer container — clean card grid
-<div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+<div className="bg-white border m-6 border-gray-100 rounded-xl overflow-hidden">
   <div className="grid grid-cols-1 800px:grid-cols-2">
 
     {/* Left — Gallery */}

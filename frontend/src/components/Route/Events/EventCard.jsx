@@ -25,7 +25,7 @@ const addToCartHandler = (data) => {
     }
   }
   return (
-     <div className={`w-full bg-white border border-gray-100 rounded-xl overflow-hidden flex flex-col lg:flex-row ${active ? "" : "mb-12"}`}>
+     <div className={`w-full my-6 bg-white border border-gray-100 rounded-xl overflow-hidden flex flex-col lg:flex-row ${active ? "" : "mb-12"}`}>
       
       {/* Image */}
       <div className="relative w-full lg:w-[340px] shrink-0">
