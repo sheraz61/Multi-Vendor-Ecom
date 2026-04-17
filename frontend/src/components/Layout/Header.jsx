@@ -35,13 +35,16 @@ const Header = ({ activeHeading }) => {
     const term = e.target.value;
     setSearchTerm(term);
 
-    const filteredProducts =
-      allProducts &&
-      allProducts.filter((product) =>
-        product.name.toLowerCase().includes(term.toLowerCase())
-      );
-    setSearchData(filteredProducts);
-
+    if (term.trim() === "") {
+      setSearchData(null);
+    } else {
+      const filteredProducts =
+        allProducts &&
+        allProducts.filter((product) =>
+          product.name.toLowerCase().includes(term.toLowerCase())
+        );
+      setSearchData(filteredProducts);
+    }
   }
 
   window.addEventListener("scroll", () => {
@@ -70,18 +73,18 @@ const Header = ({ activeHeading }) => {
             className="w-full h-[38px] px-4 pr-10 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:border-teal-500"
           />
           <AiOutlineSearch size={18} className="absolute right-3 top-2.5 text-gray-400" />
-          {searchData && searchData.length > 0 && (
+          {searchData && searchData.length > 0 ? (
             <div className="absolute top-[42px] left-0 right-0 bg-white border border-gray-100 rounded-lg z-50 overflow-hidden shadow-sm">
               {searchData.map((i, index) => (
                 <Link to={`/product/${i._id}`} key={index}>
                   <div className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 border-b border-gray-50 last:border-0">
-                    <img src={`${backend_Url}${i.images[0]}`} alt="" className="w-9 h-9 rounded-md object-cover" />
+                    <img src={`${i.images?.[0]?.url}`} alt="" className="w-9 h-9 rounded-md object-cover" />
                     <span className="text-sm text-gray-800">{i.name}</span>
                   </div>
                 </Link>
               ))}
             </div>
-          )}
+          ):null}
         </div>
 
         <Link to={isSeller ? "/dashboard" : "/shop-create"}>
