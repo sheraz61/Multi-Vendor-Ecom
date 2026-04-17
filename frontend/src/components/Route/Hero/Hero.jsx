@@ -5,27 +5,25 @@ import styles from "../../../styles/style";
 const Hero = () => {
   return (
     <div
-      className={`relative min-h-[70vh] 800px:min-h-[80vh] w-full bg-no-repeat ${styles.normalFlex}`}
+      className={`relative min-h-[75vh] w-full flex items-center bg-cover bg-center`}
       style={{
         backgroundImage:
           "url(https://themes.rslahmed.dev/rafcart/assets/images/banner-2.jpg)",
       }}
     >
-      <div className={`${styles.section} w-[90%] 800px:w-[60%]`}>
+      <div className="absolute inset-0 bg-black/40"></div>
+      <div className={`relative w-[90%] md:w-[60%] mx-auto text-white`}>
         <h1
-          className={`text-[35px] leading-[1.2] 800px:text-[60px] text-[#3d3a3a] font-[600] capitalize`}
+          className={`text-3xl md:text-6xl font-semibold leading-tight`}
         >
-          Best Collection for <br /> home Decoration
+          Everything You Need, <br /> All in One Place
         </h1>
-        <p className="pt-5 text-[16px] font-[Poppins] font-[400] text-[#000000ba]">
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Beatae,
-          assumenda? Quisquam itaque <br /> exercitationem labore vel, dolore
-          quidem asperiores, laudantium temporibus soluta optio consequatur{" "}
-          <br /> aliquam deserunt officia. Dolorum saepe nulla provident.
+        <p className="mt-4 text-sm md:text-lg text-gray-200 max-w-xl">
+         Shop from thousands of products across multiple categories. Discover great deals, trusted sellers, and a seamless shopping experience all in one platform.
         </p>
         <Link to="/products" className="inline-block">
-            <div className={`${styles.button} mt-5`}>
-                 <span className="text-[#fff] font-[Poppins] text-[18px]">
+            <div className={`mt-6 px-6 py-3 bg-teal-600 hover:bg-teal-700 transition rounded-lg text-white font-medium`}>
+                 <span className="">
                     Shop Now
                  </span>
             </div>
