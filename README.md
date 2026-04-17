@@ -189,58 +189,23 @@ graph TB
 ### Customer User Flow
 
 ```mermaid
-graph TD
-  Start([User Lands on Platform]) --> Browse{Browse or<br/>Search?}
-  
-  Browse -->|Browse| Category["View Category<br/>or Best Sellers"]
-  Browse -->|Search| Search["Search Products<br/>Filter by Price/Rating"]
-  
-  Category --> ViewProduct["View Product<br/>Details & Reviews"]
-  Search --> ViewProduct
-  
-  ViewProduct --> AddCart{Add to<br/>Cart?}
-  AddCart -->|No| Continue["Continue Shopping"]
-  AddCart -->|Yes| CartAdd["Added to Cart<br/>Redux State Updated"]
-  
-  Continue --> Browse
-  
-  CartAdd --> CheckCart{Proceed to<br/>Checkout?}
-  CheckCart -->|No| Browse
-  CheckCart -->|Yes| Login{Logged<br/>In?}
-  
-  Login -->|No| AuthPage["Login/Signup<br/>JWT Token Generated"]
-  Login -->|Yes| AuthPage
-  
-  AuthPage --> Checkout["Checkout Page<br/>Review Items<br/>Enter Shipping Address"]
-  
-  Checkout --> SelectPayment["Select Payment<br/>Method"]
-  
-  SelectPayment --> Payment{Payment<br/>Type?}
-  Payment -->|Stripe| StripePayment["Stripe Integration<br/>Secure Card Payment"]
-  Payment -->|PayPal| PayPalPayment["PayPal Integration<br/>Account Payment"]
-  
-  StripePayment --> ProcessPayment["Process Payment<br/>Validate & Capture"]
-  PayPalPayment --> ProcessPayment
-  
-  ProcessPayment --> PaymentSuccess{Payment<br/>Success?}
-  
-  PaymentSuccess -->|Failed| PaymentError["Payment Error<br/>Retry Options"]
-  PaymentError --> SelectPayment
-  
-  PaymentSuccess -->|Success| CreateOrder["Create Order<br/>Update Inventory<br/>Emit Event"]
-  
-  CreateOrder --> OrderSuccess["Order Confirmation<br/>Redirect to Success Page<br/>Send Email"]
-  
-  OrderSuccess --> Dashboard["Dashboard<br/>View Orders<br/>Track Status"]
-  
-  Dashboard --> ManageOrder{Manage<br/>Order?}
-  ManageOrder -->|Track| TrackOrder["Real-time Tracking<br/>Status Updates"]
-  ManageOrder -->|Message Seller| StartChat["Open Chat<br/>Real-time Messaging<br/>Socket.io"]
-  ManageOrder -->|Review| Review["Leave Review<br/>Rating & Comment"]
-  
-  TrackOrder --> End([End])
-  StartChat --> End
-  Review --> End
+graph LR
+  Start([Browse Products]) --> View["View Product<br/>Details"]
+  View --> Decision{Add to<br/>Cart?}
+  Decision -->|No| Start
+  Decision -->|Yes| Cart["Shopping Cart"]
+  Cart --> Auth{Logged<br/>In?}
+  Auth -->|No| Login["Login/Signup"]
+  Auth -->|Yes| Checkout["Checkout &<br/>Payment"]
+  Login --> Checkout
+  Checkout --> Confirm["Order<br/>Confirmed"]
+  Confirm --> Actions{Select<br/>Action}
+  Actions -->|Track| Track["Track Order<br/>Status"]
+  Actions -->|Review| Review["Leave Review<br/>& Rating"]
+  Actions -->|Message| Chat["Chat with<br/>Seller"]
+  Track --> Dashboard["My Dashboard"]
+  Review --> Dashboard
+  Chat --> Dashboard
 ```
 
 ### Seller Flow
